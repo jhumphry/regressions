@@ -19,13 +19,8 @@ class PCR_NIPALS:
             raise ParameterError('X and Y data must have the same '\
             'number of rows (data samples)')
 
-        if (g == None) and (variation_explained == None):
+        if (g == None) == (variation_explained == None):
             raise ParameterError('Must specify either the number of ' \
-            'principal components g to use or the proportion of data '\
-            'variance that must be explained.')
-
-        if (g != None) and (variation_explained != None):
-            raise ParameterError('Cannot specify both the number of ' \
             'principal components g to use or the proportion of data '\
             'variance that must be explained.')
 
@@ -56,8 +51,9 @@ class PCR_NIPALS:
         Yc = Y - self.Y_offset # Yc is the centred version of Y
 
         self.components = 0
-        T = np.empty((self.data_samples, g)) # Scores
-        P = np.empty((self.X_variables, g)) # Loadings
+        T = np.empty((self.data_samples, self.max_rank)) # Scores
+        P = np.empty((self.X_variables, self.max_rank)) # Loadings
+        eig = np.empty((self.max_rank,))
         X_j = Xc
 
         for j in range(0, g):
@@ -83,13 +79,14 @@ class PCR_NIPALS:
             X_j = X_j - np.outer(t_j, p_j.T) # Reduce in rank
             T[:,j] = t_j
             P[:,j] = p_j
+            eig[j] = t_j @ t_j
             self.components += 1
 
         # Only copy the components actually used
         self.T = T[:,0:self.components]
         self.P = P[:,0:self.components]
 
-        self.eigenvalues = (self.T.T @ self.T).diagonal()
+        self.eigenvalues = eig[0:self.components]
 
         # Find regression parameters
         self.C = np.diag(1.0 / self.eigenvalues) @ self.T.T @ Yc
