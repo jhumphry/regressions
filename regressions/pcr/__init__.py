@@ -25,23 +25,21 @@ class PCR_NIPALS:
             'variance that must be explained.')
 
         if variation_explained != None:
-            if variation_explained < 0.10 or variation_explained > 0.95:
+            if variation_explained < 0.001 or\
+                    variation_explained > 0.999:
                 raise ParameterError('PCR will not reliably be able '\
                 'to use principal components that explain less than '\
-                '10% or more than 95% of the variation in the data.')
-
-        if variation_explained != None:
-            raise ParameterError('Use of variation_explained not ' \
-            'implemented yet!')
+                '0.1% or more than 99.9% of the variation in the data.')
 
         self.max_rank = min(X.shape)
         self.data_samples = X.shape[0]
         self.X_variables = X.shape[1]
         self.Y_variables = Y.shape[1]
 
-        if g != None and g < 1 or g > self.max_rank:
-            raise ParameterError('Number of required components ' \
-            'specified is impossible.')
+        if g != None:
+            if g < 1 or g > self.max_rank:
+                raise ParameterError('Number of required components ' \
+                'specified is impossible.')
 
         self.X_offset = X.mean(0)
         Xc = X - self.X_offset # Xc is the centred version of X
@@ -50,13 +48,15 @@ class PCR_NIPALS:
         self.Y_offset = Y.mean(0)
         Yc = Y - self.Y_offset # Yc is the centred version of Y
 
-        self.components = 0
+
         T = np.empty((self.data_samples, self.max_rank)) # Scores
         P = np.empty((self.X_variables, self.max_rank)) # Loadings
         eig = np.empty((self.max_rank,))
+
+        self.components = 0
         X_j = Xc
 
-        for j in range(0, g):
+        while True:
 
             t_j = X_j[:,random.randint(0, self.X_variables-1)]
             iteration_count = 0
@@ -77,10 +77,19 @@ class PCR_NIPALS:
                 break
 
             X_j = X_j - np.outer(t_j, p_j.T) # Reduce in rank
-            T[:,j] = t_j
-            P[:,j] = p_j
-            eig[j] = t_j @ t_j
+            T[:,self.components] = t_j
+            P[:,self.components] = p_j
+            eig[self.components] = t_j @ t_j
             self.components += 1
+
+            if g != None:
+                if self.components == g:
+                    break
+
+            if variation_explained != None:
+                if eig[0:self.components].sum() >= \
+                        variation_explained * self.total_variation:
+                    break
 
         # Only copy the components actually used
         self.T = T[:,0:self.components]
