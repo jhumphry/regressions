@@ -8,6 +8,7 @@ from .. import *
 
 
 class PCR_NIPALS:
+
     """PCR using the NIPALS (Nonlinear Iterative Partial Least Squares)
     algorithm for finding the principal components."""
 
@@ -45,11 +46,27 @@ class PCR_NIPALS:
                                      'specified is impossible.')
 
         self.X_offset = X.mean(0)
-        Xc = X - self.X_offset  # Xc is the centred version of X
-        self.total_variation = (Xc @ Xc.T).trace()
 
+        self._perform_pca(X, g, variation_explained,
+                          max_iterations, iteration_convergence)
+
+        # Find regression parameters
         self.Y_offset = Y.mean(0)
         Yc = Y - self.Y_offset  # Yc is the centred version of Y
+
+        self.C = np.diag(1.0 / self.eigenvalues) @ self.T.T @ Yc
+        self.PgC = self.P @ self.C
+
+    def _perform_pca(self, X, g=None, variation_explained=None,
+                     max_iterations=DEFAULT_MAX_ITERATIONS,
+                     iteration_convergence=DEFAULT_EPSILON):
+
+        """A non-public routine that performs the PCA using an
+        appropriate method and sets up self.total_variation, self.T,
+        self.P, self.eignvalues and self.components."""
+
+        Xc = X - self.X_offset  # Xc is the centred version of X
+        self.total_variation = (Xc @ Xc.T).trace()
 
         T = np.empty((self.data_samples, self.max_rank))  # Scores
         P = np.empty((self.X_variables, self.max_rank))  # Loadings
@@ -99,10 +116,6 @@ class PCR_NIPALS:
 
         self.eigenvalues = eig[0:self.components]
 
-        # Find regression parameters
-        self.C = np.diag(1.0 / self.eigenvalues) @ self.T.T @ Yc
-        self.PgC = self.P @ self.C
-
     def variation_explained(self):
         return self.eigenvalues.sum() / self.total_variation
 
@@ -121,46 +134,20 @@ class PCR_NIPALS:
             return self.Y_offset + (Z - self.X_offset) @ self.PgC
 
 
-class PCR_SVD:
+class PCR_SVD(PCR_NIPALS):
+
     """PCR using the SVD method for finding the principal components."""
 
-    def __init__(self, X, Y, g=None, variation_explained=None):
+    def _perform_pca(self, X, g=None, variation_explained=None,
+                     max_iterations=DEFAULT_MAX_ITERATIONS,
+                     iteration_convergence=DEFAULT_EPSILON):
 
-        if X.shape[0] != Y.shape[0]:
-            raise ParameterError('X and Y data must have the same '
-                                 'number of rows (data samples)')
+        """A non-public routine that performs the PCA using an
+        appropriate method and sets up self.total_variation, self.T,
+        self.P, self.eignvalues and self.components."""
 
-        if (g is None) == (variation_explained is None):
-            raise ParameterError('Must specify either the number of '
-                                 'principal components g to use or the '
-                                 'proportion of data variance that '
-                                 'must be explained.')
-
-        if variation_explained is not None:
-            if variation_explained < 0.001 or\
-                    variation_explained > 0.999:
-                raise ParameterError('PCR will not reliably be able to '
-                                     'use principal components that '
-                                     'explain less than 0.1% or more '
-                                     'than 99.9% of the variation in '
-                                     'the data.')
-
-        self.max_rank = min(X.shape)
-        self.data_samples = X.shape[0]
-        self.X_variables = X.shape[1]
-        self.Y_variables = Y.shape[1]
-
-        if g is not None:
-            if g < 1 or g > self.max_rank:
-                raise ParameterError('Number of required components '
-                                     'specified is impossible.')
-
-        self.X_offset = X.mean(0)
         Xc = X - self.X_offset  # Xc is the centred version of X
         self.total_variation = (Xc @ Xc.T).trace()
-
-        self.Y_offset = Y.mean(0)
-        Yc = Y - self.Y_offset  # Yc is the centred version of Y
 
         u, s, v = linalg.svd(Xc, full_matrices=False)
 
@@ -174,29 +161,8 @@ class PCR_SVD:
             self.eigenvalues = eig[0:g]
             self.components = g
         else:
-            cum_expl = (eig.cumsum()/self.total_variation)
-            self.components = cum_expl.searchsorted(variation_explained)
+            cuml = (eig.cumsum()/self.total_variation)
+            self.components = cuml.searchsorted(variation_explained) + 1
             self.T = T[:, 0:self.components]
             self.P = P[:, 0:self.components]
             self.eigenvalues = eig[0:self.components]
-
-        # Find regression parameters
-        self.C = np.diag(1.0 / self.eigenvalues) @ self.T.T @ Yc
-        self.PgC = self.P @ self.C
-
-    def variation_explained(self):
-        return self.eigenvalues.sum() / self.total_variation
-
-    def prediction(self, Z):
-        if len(Z.shape) == 1:
-            if Z.shape[0] != self.X_variables:
-                raise ParameterError('Data provided does not have the '
-                                     'same number of variables as the '
-                                     'original X data')
-            return self.Y_offset + (Z - self.X_offset) @ self.PgC
-        else:
-            if Z.shape[1] != self.X_variables:
-                raise ParameterError('Data provided does not have the '
-                                     'same number of variables as the '
-                                     'original X data')
-            return self.Y_offset + (Z - self.X_offset) @ self.PgC
