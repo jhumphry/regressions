@@ -11,46 +11,48 @@ class PCR_NIPALS:
     """PCR using the NIPALS (Nonlinear Iterative Partial Least Squares)
     algorithm for finding the principal components."""
 
-    def __init__(self, X, Y, g = None, variation_explained = None,
-                    max_iterations = DEFAULT_MAX_ITERATIONS,
-                    iteration_convergence = DEFAULT_EPSILON):
+    def __init__(self, X, Y, g=None, variation_explained=None,
+                 max_iterations=DEFAULT_MAX_ITERATIONS,
+                 iteration_convergence=DEFAULT_EPSILON):
 
         if X.shape[0] != Y.shape[0]:
-            raise ParameterError('X and Y data must have the same '\
-            'number of rows (data samples)')
+            raise ParameterError('X and Y data must have the same '
+                                 'number of rows (data samples)')
 
-        if (g == None) == (variation_explained == None):
-            raise ParameterError('Must specify either the number of ' \
-            'principal components g to use or the proportion of data '\
-            'variance that must be explained.')
+        if (g is None) == (variation_explained is None):
+            raise ParameterError('Must specify either the number of '
+                                 'principal components g to use or the '
+                                 'proportion of data variance that '
+                                 'must be explained.')
 
-        if variation_explained != None:
+        if variation_explained is not None:
             if variation_explained < 0.001 or\
                     variation_explained > 0.999:
-                raise ParameterError('PCR will not reliably be able '\
-                'to use principal components that explain less than '\
-                '0.1% or more than 99.9% of the variation in the data.')
+                raise ParameterError('PCR will not reliably be able to '
+                                     'use principal components that '
+                                     'explain less than 0.1% or more '
+                                     'than 99.9% of the variation in '
+                                     'the data.')
 
         self.max_rank = min(X.shape)
         self.data_samples = X.shape[0]
         self.X_variables = X.shape[1]
         self.Y_variables = Y.shape[1]
 
-        if g != None:
+        if g is not None:
             if g < 1 or g > self.max_rank:
-                raise ParameterError('Number of required components ' \
-                'specified is impossible.')
+                raise ParameterError('Number of required components '
+                                     'specified is impossible.')
 
         self.X_offset = X.mean(0)
-        Xc = X - self.X_offset # Xc is the centred version of X
+        Xc = X - self.X_offset  # Xc is the centred version of X
         self.total_variation = (Xc @ Xc.T).trace()
 
         self.Y_offset = Y.mean(0)
-        Yc = Y - self.Y_offset # Yc is the centred version of Y
+        Yc = Y - self.Y_offset  # Yc is the centred version of Y
 
-
-        T = np.empty((self.data_samples, self.max_rank)) # Scores
-        P = np.empty((self.X_variables, self.max_rank)) # Loadings
+        T = np.empty((self.data_samples, self.max_rank))  # Scores
+        P = np.empty((self.X_variables, self.max_rank))  # Loadings
         eig = np.empty((self.max_rank,))
 
         self.components = 0
@@ -58,15 +60,15 @@ class PCR_NIPALS:
 
         while True:
 
-            t_j = X_j[:,random.randint(0, self.X_variables-1)]
+            t_j = X_j[:, random.randint(0, self.X_variables-1)]
             iteration_count = 0
             iteration_change = iteration_convergence * 10.0
 
-            while iteration_count < max_iterations and \
-                        iteration_change > iteration_convergence:
+            while iteration_count < max_iterations and\
+                    iteration_change > iteration_convergence:
 
                 p_j = X_j.T @ t_j
-                p_j /= np.linalg.norm(p_j, 2) # Normalise p_j vectors
+                p_j /= np.linalg.norm(p_j, 2)  # Normalise p_j vectors
 
                 old_t_j = t_j
                 t_j = X_j @ p_j
@@ -76,24 +78,24 @@ class PCR_NIPALS:
             if iteration_count >= max_iterations:
                 break
 
-            X_j = X_j - np.outer(t_j, p_j.T) # Reduce in rank
-            T[:,self.components] = t_j
-            P[:,self.components] = p_j
+            X_j = X_j - np.outer(t_j, p_j.T)  # Reduce in rank
+            T[:, self.components] = t_j
+            P[:, self.components] = p_j
             eig[self.components] = t_j @ t_j
             self.components += 1
 
-            if g != None:
+            if g is not None:
                 if self.components == g:
                     break
 
-            if variation_explained != None:
+            if variation_explained is not None:
                 if eig[0:self.components].sum() >= \
-                        variation_explained * self.total_variation:
+                   variation_explained * self.total_variation:
                     break
 
         # Only copy the components actually used
-        self.T = T[:,0:self.components]
-        self.P = P[:,0:self.components]
+        self.T = T[:, 0:self.components]
+        self.P = P[:, 0:self.components]
 
         self.eigenvalues = eig[0:self.components]
 
@@ -107,13 +109,13 @@ class PCR_NIPALS:
     def prediction(self, Z):
         if len(Z.shape) == 1:
             if Z.shape[0] != self.X_variables:
-                raise ParameterError('Data provided does not have the same'\
-                'number of variables as the original X data')
+                raise ParameterError('Data provided does not have the '
+                                     'same number of variables as the '
+                                     'original X data')
             return self.Y_offset + (Z - self.X_offset) @ self.PgC
         else:
             if Z.shape[1] != self.X_variables:
-                raise ParameterError('Data provided does not have the same'\
-                'number of variables as the original X data')
+                raise ParameterError('Data provided does not have the '
+                                     'same number of variables as the '
+                                     'original X data')
             return self.Y_offset + (Z - self.X_offset) @ self.PgC
-
-

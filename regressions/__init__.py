@@ -10,6 +10,7 @@ except ImportError:
     import numpy.linalg as linalg
     linalg_source = 'numpy'
 
+
 class ParameterError(Exception):
     """Parameters passed to a regression routine are unacceptable"""
     pass
