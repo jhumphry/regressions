@@ -11,7 +11,8 @@ class PLS1:
 
     """Regression using the PLS1 algorithm."""
 
-    def __init__(self, X, Y, g, epsilon=DEFAULT_EPSILON):
+    def __init__(self, X, Y, g,
+                 epsilon=DEFAULT_EPSILON, ignore_failures=False):
 
         if X.shape[0] != Y.shape[0]:
             raise ParameterError('X and Y data must have the same '
@@ -31,11 +32,13 @@ class PLS1:
         self.Y_offset = Y.mean(0)
         Yc = Y - self.Y_offset  # Yc is the centred version of Y
 
-        self.W = np.empty((self.Y_variables, self.X_variables, g))
-        self.P = np.empty((self.Y_variables, self.X_variables, g))
-        self.T = np.empty((self.Y_variables, self.data_samples, g))
-        self.c = np.empty((self.Y_variables, g))
-        self.b = np.empty((self.Y_variables, self.X_variables))
+        self.components = g
+
+        W = np.empty((self.Y_variables, self.X_variables, g))
+        P = np.empty((self.Y_variables, self.X_variables, g))
+        T = np.empty((self.Y_variables, self.data_samples, g))
+        c = np.empty((self.Y_variables, g))
+        b = np.empty((self.Y_variables, self.X_variables))
 
         for z in range(0, self.Y_variables):
 
@@ -52,24 +55,40 @@ class PLS1:
 
                 c_j = (t_j.T @ y_j) / tt_j
                 if c_j < epsilon:
-                    print('PLS1 failed at iteration: {}'.format(j))
-                    break
+                    if ignore_failures:
+                        if self.components > j:
+                            self.components = j  # See comment below
+                        break
+                    else:
+                        raise ConvergenceError('PLS1 failed at iteration: '
+                                               'g={}, j={}'.format(g, j))
 
                 p_j = (X_j.T @ t_j) / tt_j
 
                 X_j = X_j - np.outer(t_j, p_j.T)  # Reduce in rank
                 y_j = y_j - t_j * c_j
 
-                self.W[z, :, j] = w_j
-                self.P[z, :, j] = p_j
-                self.T[z, :, j] = t_j
-                self.c[z, j] = c_j
+                W[z, :, j] = w_j
+                P[z, :, j] = p_j
+                T[z, :, j] = t_j
+                c[z, j] = c_j
             else:
                 # N.B - don't try to find the regression matrix if the
-                # iteration failed!
-                self.b[z, :] = self.W[z, :, :] @ \
-                    linalg.inv(self.P[z, :, :].T @ self.W[z, :, :]) @ \
-                    self.c[z, :]
+                # iteration failed! Inversion won't work...
+                b[z, :] = W[z, :, :] @ \
+                    linalg.inv(P[z, :, :].T @ W[z, :, :]) @ \
+                    c[z, :]
+
+        # If one of the iterations fails due to c_j becoming too small, then
+        # self.components will be reduced and the output will be cut down to
+        # the lowest number of iterations achieved for any of the Y variables.
+        # Of course, b may no longer be a particularly good regression vector
+        # in this case.
+        self.W = W[:, :, 0:self.components]
+        self.P = P[:, :, 0:self.components]
+        self.T = T[:, :, 0:self.components]
+        self.c = c[:, 0:self.components]
+        self.b = b
 
     def prediction(self, Z):
         if len(Z.shape) == 1:

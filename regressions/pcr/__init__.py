@@ -14,7 +14,8 @@ class PCR_NIPALS:
 
     def __init__(self, X, Y, g=None, variation_explained=None,
                  max_iterations=DEFAULT_MAX_ITERATIONS,
-                 iteration_convergence=DEFAULT_EPSILON):
+                 iteration_convergence=DEFAULT_EPSILON,
+                 ignore_failures=True):
 
         if X.shape[0] != Y.shape[0]:
             raise ParameterError('X and Y data must have the same '
@@ -48,7 +49,8 @@ class PCR_NIPALS:
         self.X_offset = X.mean(0)
 
         self._perform_pca(X, g, variation_explained,
-                          max_iterations, iteration_convergence)
+                          max_iterations, iteration_convergence,
+                          ignore_failures)
 
         # Find regression parameters
         self.Y_offset = Y.mean(0)
@@ -59,7 +61,8 @@ class PCR_NIPALS:
 
     def _perform_pca(self, X, g=None, variation_explained=None,
                      max_iterations=DEFAULT_MAX_ITERATIONS,
-                     iteration_convergence=DEFAULT_EPSILON):
+                     iteration_convergence=DEFAULT_EPSILON,
+                     ignore_failures=True):
 
         """A non-public routine that performs the PCA using an
         appropriate method and sets up self.total_variation, self.T,
@@ -93,7 +96,12 @@ class PCR_NIPALS:
                 iteration_count += 1
 
             if iteration_count >= max_iterations:
-                break
+                if ignore_failures:
+                    break
+                else:
+                    raise ConvergenceError('NIPALS PCA for PCR failed to '
+                                           'converge for component: '
+                                           '{}'.format(self.components+1))
 
             X_j = X_j - np.outer(t_j, p_j.T)  # Reduce in rank
             T[:, self.components] = t_j
