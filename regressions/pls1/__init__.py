@@ -107,3 +107,38 @@ class PLS1:
                 result[i, :] = self.Y_offset + \
                               (Z[i, :] - self.X_offset).T @ self.b.T
             return result
+
+    def prediction_iterative(self, Z):
+        if len(Z.shape) == 1:
+            if Z.shape[0] != self.X_variables:
+                raise ParameterError('Data provided does not have the  same '
+                                     'number of variables as the original X '
+                                     'data')
+            result = self.Y_offset.copy()
+            for k in range(0, self.Y_variables):
+                x_j = Z - self.X_offset
+                t = np.empty((self.components))
+                for j in range(0, self.components):
+                    t[j] = x_j @ self.W[k, :, j]
+                    x_j = x_j - t[j] * self.P[k, :, j]
+                result[k] += self.c[k, :] @ t
+
+            return result
+
+        else:
+            if Z.shape[1] != self.X_variables:
+                raise ParameterError('Data provided does not have the  same '
+                                     'number of variables as the original X '
+                                     'data')
+            result = np.empty((Z.shape[0], self.Y_variables))
+            result[:, :] = self.Y_offset.copy()
+            for l in range(0, Z.shape[0]):
+                for k in range(0, self.Y_variables):
+                    x_j = Z[l, :] - self.X_offset
+                    t = np.empty((self.components))
+                    for j in range(0, self.components):
+                        t[j] = x_j @ self.W[k, :, j]
+                        x_j = x_j - t[j] * self.P[k, :, j]
+                    result[l, k] += self.c[k, :] @ t
+
+            return result
