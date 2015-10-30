@@ -16,6 +16,9 @@ class PLS1:
             raise ParameterError('X and Y data must have the same '
                                  'number of rows (data samples)')
 
+        if len(Y.shape) == 1:
+            Y = Y.reshape((Y.shape[0], 1))
+
         self.max_rank = min(X.shape)
         self.data_samples = X.shape[0]
         self.X_variables = X.shape[1]

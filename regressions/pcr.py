@@ -21,6 +21,9 @@ class PCR_NIPALS:
             raise ParameterError('X and Y data must have the same number of '
                                  'rows (data samples)')
 
+        if len(Y.shape) == 1:
+            Y = Y.reshape((Y.shape[0], 1))
+
         if (g is None) == (variation_explained is None):
             raise ParameterError('Must specify either the number of principal '
                                  'components g to use or the proportion of '

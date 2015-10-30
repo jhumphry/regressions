@@ -17,6 +17,12 @@ class MLR:
             raise ParameterError('X and Y data must have the same number of '
                                  'rows (data samples)')
 
+        if len(X.shape) == 1:
+            X = X.reshape((X.shape[0], 1))
+
+        if len(Y.shape) == 1:
+            Y = Y.reshape((Y.shape[0], 1))
+
         if X.shape[0] <= X.shape[1]:
             raise ParameterError('MLR requires more rows (data samples) than '
                                  'input variables (columns of X data)')
