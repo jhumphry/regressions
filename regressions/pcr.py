@@ -18,23 +18,21 @@ class PCR_NIPALS:
                  ignore_failures=True):
 
         if X.shape[0] != Y.shape[0]:
-            raise ParameterError('X and Y data must have the same '
-                                 'number of rows (data samples)')
+            raise ParameterError('X and Y data must have the same number of '
+                                 'rows (data samples)')
 
         if (g is None) == (variation_explained is None):
-            raise ParameterError('Must specify either the number of '
-                                 'principal components g to use or the '
-                                 'proportion of data variance that '
-                                 'must be explained.')
+            raise ParameterError('Must specify either the number of principal '
+                                 'components g to use or the proportion of '
+                                 'data variance that must be explained.')
 
         if variation_explained is not None:
             if variation_explained < 0.001 or\
                     variation_explained > 0.999:
-                raise ParameterError('PCR will not reliably be able to '
-                                     'use principal components that '
-                                     'explain less than 0.1% or more '
-                                     'than 99.9% of the variation in '
-                                     'the data.')
+                raise ParameterError('PCR will not reliably be able to use '
+                                     'principal components that explain less '
+                                     'than 0.1% or more than 99.9% of the '
+                                     'variation in the data.')
 
         self.max_rank = min(X.shape)
         self.data_samples = X.shape[0]
@@ -43,8 +41,8 @@ class PCR_NIPALS:
 
         if g is not None:
             if g < 1 or g > self.max_rank:
-                raise ParameterError('Number of required components '
-                                     'specified is impossible.')
+                raise ParameterError('Number of required components specified '
+                                     'is impossible.')
 
         self.X_offset = X.mean(0)
 
@@ -64,9 +62,9 @@ class PCR_NIPALS:
                      iteration_convergence=DEFAULT_EPSILON,
                      ignore_failures=True):
 
-        """A non-public routine that performs the PCA using an
-        appropriate method and sets up self.total_variation, self.T,
-        self.P, self.eignvalues and self.components."""
+        """A non-public routine that performs the PCA using an appropriate
+        method and sets up self.total_variation, self.T, self.P,
+        self.eignvalues and self.components."""
 
         Xc = X - self.X_offset  # Xc is the centred version of X
         self.total_variation = (Xc @ Xc.T).trace()
@@ -84,7 +82,7 @@ class PCR_NIPALS:
             iteration_count = 0
             iteration_change = iteration_convergence * 10.0
 
-            while iteration_count < max_iterations and\
+            while iteration_count < max_iterations and \
                     iteration_change > iteration_convergence:
 
                 p_j = X_j.T @ t_j
@@ -130,15 +128,15 @@ class PCR_NIPALS:
     def prediction(self, Z):
         if len(Z.shape) == 1:
             if Z.shape[0] != self.X_variables:
-                raise ParameterError('Data provided does not have the '
-                                     'same number of variables as the '
-                                     'original X data')
+                raise ParameterError('Data provided does not have the same '
+                                     'number of variables as the original X '
+                                     'data')
             return self.Y_offset + (Z - self.X_offset) @ self.PgC
         else:
             if Z.shape[1] != self.X_variables:
-                raise ParameterError('Data provided does not have the '
-                                     'same number of variables as the '
-                                     'original X data')
+                raise ParameterError('Data provided does not have the same '
+                                     'number of variables as the original X '
+                                     'data')
             return self.Y_offset + (Z - self.X_offset) @ self.PgC
 
 
@@ -150,9 +148,9 @@ class PCR_SVD(PCR_NIPALS):
                      max_iterations=DEFAULT_MAX_ITERATIONS,
                      iteration_convergence=DEFAULT_EPSILON):
 
-        """A non-public routine that performs the PCA using an
-        appropriate method and sets up self.total_variation, self.T,
-        self.P, self.eignvalues and self.components."""
+        """A non-public routine that performs the PCA using an appropriate
+        method and sets up self.total_variation, self.T, self.P,
+        self.eignvalues and self.components."""
 
         Xc = X - self.X_offset  # Xc is the centred version of X
         self.total_variation = (Xc @ Xc.T).trace()
