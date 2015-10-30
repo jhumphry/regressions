@@ -2,8 +2,6 @@
 
 """A package which implements the Partial Least Squares 1 algorithm."""
 
-import random
-
 from . import *
 
 
