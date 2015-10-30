@@ -4,7 +4,7 @@
 
 import random
 
-from .. import *
+from . import *
 
 
 class PLS1:
