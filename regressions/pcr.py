@@ -48,8 +48,10 @@ class PCR_NIPALS:
                                      'is impossible.')
 
         self.X_offset = X.mean(0)
+        Xc = X - self.X_offset  # Xc is the centred version of X
+        self.total_variation = (Xc @ Xc.T).trace()
 
-        self._perform_pca(X, g, variation_explained,
+        self._perform_pca(Xc, g, variation_explained,
                           max_iterations, iteration_convergence,
                           ignore_failures)
 
@@ -66,18 +68,15 @@ class PCR_NIPALS:
                      ignore_failures=True):
 
         """A non-public routine that performs the PCA using an appropriate
-        method and sets up self.total_variation, self.T, self.P,
-        self.eignvalues and self.components."""
-
-        Xc = X - self.X_offset  # Xc is the centred version of X
-        self.total_variation = (Xc @ Xc.T).trace()
+        method and sets up self.T, self.P, self.eignvalues and
+        self.components."""
 
         T = np.empty((self.data_samples, self.max_rank))  # Scores
         P = np.empty((self.X_variables, self.max_rank))  # Loadings
         eig = np.empty((self.max_rank,))
 
         self.components = 0
-        X_j = Xc
+        X_j = X
 
         while True:
 
@@ -155,10 +154,7 @@ class PCR_SVD(PCR_NIPALS):
         method and sets up self.total_variation, self.T, self.P,
         self.eignvalues and self.components."""
 
-        Xc = X - self.X_offset  # Xc is the centred version of X
-        self.total_variation = (Xc @ Xc.T).trace()
-
-        u, s, v = linalg.svd(Xc, full_matrices=False)
+        u, s, v = linalg.svd(X, full_matrices=False)
 
         T = u @ np.diag(s)
         P = v.T
