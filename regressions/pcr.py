@@ -13,6 +13,7 @@ class PCR_NIPALS:
     algorithm for finding the principal components."""
 
     def __init__(self, X, Y, g=None, variation_explained=None,
+                 standardize_x=False, standardize_y=False,
                  max_iterations=DEFAULT_MAX_ITERATIONS,
                  iteration_convergence=DEFAULT_EPSILON,
                  ignore_failures=True):
@@ -41,6 +42,8 @@ class PCR_NIPALS:
         self.data_samples = X.shape[0]
         self.X_variables = X.shape[1]
         self.Y_variables = Y.shape[1]
+        self.standardized_x = standardize_x
+        self.standardized_y = standardize_y
 
         if g is not None:
             if g < 1 or g > self.max_rank:
@@ -48,8 +51,16 @@ class PCR_NIPALS:
                                      'is impossible.')
 
         self.X_offset = X.mean(0)
-        Xc = X - self.X_offset  # Xc is the centred version of X
-        self.total_variation = (Xc @ Xc.T).trace()
+        Xc = X - self.X_offset
+        if standardize_x:
+            # The reciprocals of the standard deviations of each column are
+            # stored as these are what are needed
+            self.X_rscaling = 1.0 / Xc.std(0, ddof=1)
+            Xc *= self.X_rscaling
+            self.total_variation = self.X_variables * (self.data_samples - 1.0)
+        else:
+            self.X_rscaling = None
+            self.total_variation = (Xc @ Xc.T).trace()
 
         self._perform_pca(Xc, g, variation_explained,
                           max_iterations, iteration_convergence,
@@ -57,7 +68,12 @@ class PCR_NIPALS:
 
         # Find regression parameters
         self.Y_offset = Y.mean(0)
-        Yc = Y - self.Y_offset  # Yc is the centred version of Y
+        Yc = Y - self.Y_offset
+        if standardize_y:
+            self.Y_scaling = Y.std(0, ddof=1)
+            Yc /= self.Y_scaling
+        else:
+            self.Y_scaling = None
 
         self.C = np.diag(1.0 / self.eigenvalues) @ self.T.T @ Yc
         self.PgC = self.P @ self.C
@@ -133,13 +149,17 @@ class PCR_NIPALS:
                 raise ParameterError('Data provided does not have the same '
                                      'number of variables as the original X '
                                      'data')
-            return self.Y_offset + (Z - self.X_offset) @ self.PgC
-        else:
-            if Z.shape[1] != self.X_variables:
+        elif Z.shape[1] != self.X_variables:
                 raise ParameterError('Data provided does not have the same '
                                      'number of variables as the original X '
                                      'data')
-            return self.Y_offset + (Z - self.X_offset) @ self.PgC
+        tmp = (Z - self.X_offset)
+        if self.standardized_x:
+            tmp *= self.X_rscaling
+        tmp = tmp @ self.PgC
+        if self.standardized_y:
+            tmp *= self.Y_scaling
+        return self.Y_offset + tmp
 
 
 class PCR_SVD(PCR_NIPALS):
