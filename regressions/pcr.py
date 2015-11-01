@@ -148,7 +148,8 @@ class PCR_SVD(PCR_NIPALS):
 
     def _perform_pca(self, X, g=None, variation_explained=None,
                      max_iterations=DEFAULT_MAX_ITERATIONS,
-                     iteration_convergence=DEFAULT_EPSILON):
+                     iteration_convergence=DEFAULT_EPSILON,
+                     ignore_failures=True):
 
         """A non-public routine that performs the PCA using an appropriate
         method and sets up self.total_variation, self.T, self.P,
