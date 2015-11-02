@@ -25,18 +25,16 @@ class PLS_SB:
         if g < 1 or g > self.max_rank:
             raise ParameterError('Number of required components '
                                  'specified is impossible.')
-
+        self.components = g
         self.X_offset = X.mean(0)
         Xc = X - self.X_offset  # Xc is the centred version of X
         self.Y_offset = Y.mean(0)
         Yc = Y - self.Y_offset  # Yc is the centred version of Y
 
-        tmp = Xc.T @ Yc
-        XTYYTX = tmp @ tmp.T
-        ev, W = linalg.eig(XTYYTX)
+        XtY = Xc.T @ Yc
+        ev, W = linalg.eigh(XtY @ XtY.T)
 
-        self.components = g
-        self.W = W[:, g-1::-1].real
+        self.W = W[:, :-g-1:-1].real
 
         self.T = Xc @ self.W
         self.Q = Yc.T @ self.T
