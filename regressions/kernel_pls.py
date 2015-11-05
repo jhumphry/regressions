@@ -33,10 +33,10 @@ class Kernel_PLS:
             for j in range(0, self.data_samples):
                 K[i, j] = X_kernel(X[i, :], X[j, :])
 
-        tmp = (np.identity(self.data_samples)) - \
+        centralizer = (np.identity(self.data_samples)) - \
             1.0 / self.data_samples * \
             np.ones((self.data_samples, self.data_samples))
-        K = tmp @ K @ tmp
+        K = centralizer @ K @ centralizer
         self.K = K
 
         self.Y_offset = Y.mean(0)
@@ -114,7 +114,16 @@ class Kernel_PLS:
                                      'number of variables as the original X '
                                      'data')
             Kt = np.empty((Z.shape[0], self.data_samples))
+
         for i in range(0, Z.shape[0]):
             for j in range(0, self.data_samples):
                 Kt[i, j] = self.X_kernel(Z[i, :], self.X_training_set[j, :])
-        return Kt @ self.B_RHS
+
+        centralizer = 1.0 / self.data_samples * \
+            np.ones((Z.shape[0], self.data_samples))
+
+        Kt = (Kt - centralizer @ self.K) @ \
+            (np.identity(self.data_samples) - \
+            1.0 / self.data_samples * np.ones(self.data_samples))
+
+        return self.Y_offset + Kt @ self.B_RHS
