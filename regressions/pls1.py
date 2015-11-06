@@ -1,13 +1,48 @@
-# regressions.pls1
-
-"""A package which implements the Partial Least Squares 1 algorithm."""
+"""A module which implements the Partial Least Squares 1 algorithm."""
 
 from . import *
 
 
 class PLS1:
+    """Regression using the PLS1 algorithm.
 
-    """Regression using the PLS1 algorithm."""
+    The PLS1 algorithm forms new variables from the provided X data
+    samples which better describe the single output variable Y. If more
+    than one output variable is required then PLS1 will be run multiple
+    times.
+
+    Note:
+        If ``ignore_failures`` is ``True`` then the resulting object
+        may have fewer components than requested if convergence does
+        not succeed.
+
+    Args:
+        X (ndarray N x n): X calibration data, one row per data sample
+        Y (ndarray N x m): Y calibration data, one row per data sample
+        g (int): Number of components to extract
+        epsilon (float, optional): Value at which the components
+            extracted will be considered to be too small to be stable
+            and iteration will cease
+        ignore_failures (boolean, optional): Do not raise an error if
+            iteration has to be abandoned before the requested number
+            of components have been recovered
+
+    Attributes:
+        data_samples (int): number of calibration data samples (=N)
+        max_rank (int): maximum rank of calibration X-data (limits the
+            number of components that can be found)
+        X_variables (int): number of X variables (=n)
+        Y_variables (int): number of Y variables (=m)
+        X_offset (float): Offset of calibration X data from zero
+        Y_offset (float): Offset of calibration Y data from zero
+            components (int): number of components extracted (=g)
+        W (ndarray m x n x g): Weight vectors
+        P (ndarray m x n x g): Loadings (Components extracted from data)
+        T (ndarray m x N x g): Scores
+        c (ndarray m x g): Regression coefficients
+        b (ndarray m x n): Resulting regression matrix
+
+    """
 
     def __init__(self, X, Y, g,
                  epsilon=DEFAULT_EPSILON, ignore_failures=False):
@@ -92,6 +127,23 @@ class PLS1:
         self.b = b
 
     def prediction(self, Z):
+
+        """Predict the output resulting from a given input
+
+        Args:
+            Z (ndarray of floats): The input on which to make the prediction.
+                Must either be a one dimensional array of the same length as
+                the number of calibration X variables, or a two dimensional
+                array with the same number of columns as the calibration X
+                data and one row for each input row.
+
+        Returns:
+            Y (ndarray of floats) : The predicted output - either a one
+            dimensional array of the same length as the number of calibration
+            Y variables or a two dimensional array with the same number of
+            columns as the calibration Y data and one row for each input row.
+        """
+
         if len(Z.shape) == 1:
             if Z.shape[0] != self.X_variables:
                 raise ParameterError('Data provided does not have the  same '
@@ -110,6 +162,27 @@ class PLS1:
             return result
 
     def prediction_iterative(self, Z):
+
+        """Predict the output resulting from a given input, iteratively
+
+        This produces the same output as the one-step version ``prediction``
+        but works by applying each loading in turn to extract the latent
+        variables corresponding to the input.
+
+        Args:
+            Z (ndarray of floats): The input on which to make the prediction.
+                Must either be a one dimensional array of the same length as
+                the number of calibration X variables, or a two dimensional
+                array with the same number of columns as the calibration X
+                data and one row for each input row.
+
+        Returns:
+            Y (ndarray of floats) : The predicted output - either a one
+            dimensional array of the same length as the number of calibration
+            Y variables or a two dimensional array with the same number of
+            columns as the calibration Y data and one row for each input row.
+        """
+
         if len(Z.shape) == 1:
             if Z.shape[0] != self.X_variables:
                 raise ParameterError('Data provided does not have the  same '
