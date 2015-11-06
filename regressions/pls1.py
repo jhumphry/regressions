@@ -131,17 +131,18 @@ class PLS1:
         """Predict the output resulting from a given input
 
         Args:
-            Z (ndarray of floats): The input on which to make the prediction.
-                Must either be a one dimensional array of the same length as
-                the number of calibration X variables, or a two dimensional
-                array with the same number of columns as the calibration X
-                data and one row for each input row.
+            Z (ndarray of floats): The input on which to make the
+                prediction. Must either be a one dimensional array of the
+                same length as the number of calibration X variables, or a
+                two dimensional array with the same number of columns as
+                the calibration X data and one row for each input row.
 
         Returns:
             Y (ndarray of floats) : The predicted output - either a one
-            dimensional array of the same length as the number of calibration
-            Y variables or a two dimensional array with the same number of
-            columns as the calibration Y data and one row for each input row.
+            dimensional array of the same length as the number of
+            calibration Y variables or a two dimensional array with the
+            same number of columns as the calibration Y data and one row
+            for each input row.
         """
 
         if len(Z.shape) == 1:
@@ -170,17 +171,18 @@ class PLS1:
         variables corresponding to the input.
 
         Args:
-            Z (ndarray of floats): The input on which to make the prediction.
-                Must either be a one dimensional array of the same length as
-                the number of calibration X variables, or a two dimensional
-                array with the same number of columns as the calibration X
-                data and one row for each input row.
+            Z (ndarray of floats): The input on which to make the
+                prediction. Must either be a one dimensional array of the
+                same length as the number of calibration X variables, or a
+                two dimensional array with the same number of columns as
+                the calibration X data and one row for each input row.
 
         Returns:
             Y (ndarray of floats) : The predicted output - either a one
-            dimensional array of the same length as the number of calibration
-            Y variables or a two dimensional array with the same number of
-            columns as the calibration Y data and one row for each input row.
+            dimensional array of the same length as the number of
+            calibration Y variables or a two dimensional array with the
+            same number of columns as the calibration Y data and one row
+            for each input row.
         """
 
         if len(Z.shape) == 1:

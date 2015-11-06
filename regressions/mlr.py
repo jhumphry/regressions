@@ -14,10 +14,10 @@ class MLR:
     is Y = A X + E where E is a vector of zero-mean noise vectors.
 
     Note :
-        The regression matrix B is found using the pseudo-inverse. In order
-        for this to be calculable, the number of calibration samples ``N`` has
-        be be larger than the number of X variables ``n``, and there must not
-        be any collinearities in the calibration X data.
+        The regression matrix B is found using the pseudo-inverse. In
+        order for this to be calculable, the number of calibration samples
+        ``N`` has be be larger than the number of X variables ``n``, and
+        there must not be any collinearities in the calibration X data.
 
     Args:
         X (ndarray N x n): X calibration data, one row per data sample
@@ -68,17 +68,18 @@ class MLR:
         """Predict the output resulting from a given input
 
         Args:
-            Z (ndarray of floats): The input on which to make the prediction.
-                Must either be a one dimensional array of the same length as
-                the number of calibration X variables, or a two dimensional
-                array with the same number of columns as the calibration X
-                data and one row for each input row.
+            Z (ndarray of floats): The input on which to make the
+                prediction. Must either be a one dimensional array of the
+                same length as the number of calibration X variables, or a
+                two dimensional array with the same number of columns as
+                the calibration X data and one row for each input row.
 
         Returns:
             Y (ndarray of floats) : The predicted output - either a one
-            dimensional array of the same length as the number of calibration
-            Y variables or a two dimensional array with the same number of
-            columns as the calibration Y data and one row for each input row.
+            dimensional array of the same length as the number of
+            calibration Y variables or a two dimensional array with the
+            same number of columns as the calibration Y data and one row
+            for each input row.
         """
 
         if len(Z.shape) == 1:
