@@ -1,6 +1,4 @@
-# regressions.cls
-
-"""A package which implements Classical Least Squares Regression."""
+"""A module which implements Classical Least Squares Regression."""
 
 import random
 
@@ -9,7 +7,38 @@ from . import *
 
 class CLS:
 
-    """Classical Least Squares Regression"""
+    """Classical Least Squares Regression
+
+    The classical least squares regression approach is to initially swap the
+    roles of the X and Y variables, perform linear regression and then to
+    invert the result. It is useful when the number of X variables is larger
+    than the number of calibration samples available, when conventional
+    multiple linear regression would be unable to proceed.
+
+    Note :
+        The regression matrix A_pinv is found using the pseudo-inverse. In
+        order for this to be calculable, the number of calibration samples
+        ``N`` has be be larger than the number of Y variables ``m``, the
+        number of X variables ``n`` must at least equal the number of Y
+        variables, there must not be any collinearities in the calibration Y
+        data and Yt X must be non-singular.
+
+    Args:
+        X (ndarray N x n): X calibration data, one row per data sample
+        Y (ndarray N x m): Y calibration data, one row per data sample
+
+    Attributes:
+        data_samples (int): number of calibration data samples (=N)
+        max_rank (int): maximum rank of calibration X-data
+        X_variables (int): number of X variables (=n)
+        Y_variables (int): number of Y variables (=m)
+        X_offset (float): Offset of calibration X data from zero
+        Y_offset (float): Offset of calibration Y data from zero
+            components (int): number of components extracted (=g)
+        A (ndarray m x n): Resulting regression matrix of X on Y
+        A_pinv (ndarray m x n): Pseudo-inverse of A
+
+    """
 
     def __init__(self, X, Y):
 
@@ -46,6 +75,23 @@ class CLS:
         self.A_pinv = self.A.T @ linalg.inv(self.A @ self.A.T)
 
     def prediction(self, Z):
+
+        """Predict the output resulting from a given input
+
+        Args:
+            Z (ndarray of floats): The input on which to make the prediction.
+                Must either be a one dimensional array of the same length as
+                the number of calibration X variables, or a two dimensional
+                array with the same number of columns as the calibration X
+                data and one row for each input row.
+
+        Returns:
+            Y (ndarray of floats) : The predicted output - either a one
+            dimensional array of the same length as the number of calibration
+            Y variables or a two dimensional array with the same number of
+            columns as the calibration Y data and one row for each input row.
+        """
+
         if len(Z.shape) == 1:
             if Z.shape[0] != self.X_variables:
                 raise ParameterError('Data provided does not have the same '
