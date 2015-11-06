@@ -1,6 +1,8 @@
-# regressions.kernels
+"""A collection of kernels and kernel generators
 
-"""A collection of kernels and kernel generators"""
+These are mainly for use in kernel PLS. All of the kernels have the form
+K(x, y) where x and y are either floats or numpy.ndarray of float.
+"""
 
 import math
 
@@ -8,14 +10,30 @@ from . import *
 
 
 def std_gaussian(x, y):
-    """A Gaussian kernel with width 1"""
+    """A Gaussian kernel with width 1.
+
+    The Gaussian kernel with standard deviation 1 is a routine choice.
+
+    Args:
+        x (float or numpy.ndarray of float): The x coordinate
+        y (float or numpy.ndarray of float): The y coordinate
+    """
 
     return 0.3989422804014327 * math.exp(- 0.5 * np.sum((x-y)**2))
 
 
 def make_gaussian_kernel(width=1.0):
-    """Returns a function that implements a Gaussian kernel with the width
-    specified"""
+    """Create a Gaussian kernel with adjustable width
+
+    Args:
+        width (float) : The standard deviation of the Gaussian function
+            which adjusts the width of the resulting kernel.
+
+    Returns:
+        gaussian_kernel (function) : A function of two floats or
+        numpy.ndarray of floats which computes the Gaussian kernel of
+        the desired width.
+    """
 
     normalization = 1.0 / math.sqrt(2.0 * math.pi * width)
     scale = 1.0 / (2.0 * width**2)
