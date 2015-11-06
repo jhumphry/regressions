@@ -34,7 +34,7 @@ class Kernel_PLS:
                 K[i, j] = X_kernel(X[i, :], X[j, :])
 
         centralizer = (np.identity(self.data_samples)) - \
-            1.0 / self.data_samples * \
+            (1.0 / self.data_samples) * \
             np.ones((self.data_samples, self.data_samples))
         K = centralizer @ K @ centralizer
         self.K = K
@@ -119,11 +119,16 @@ class Kernel_PLS:
             for j in range(0, self.data_samples):
                 Kt[i, j] = self.X_kernel(Z[i, :], self.X_training_set[j, :])
 
-        centralizer = 1.0 / self.data_samples * \
+        centralizer = (1.0 / self.data_samples) * \
             np.ones((Z.shape[0], self.data_samples))
 
         Kt = (Kt - centralizer @ self.K) @ \
-            (np.identity(self.data_samples) - \
-            1.0 / self.data_samples * np.ones(self.data_samples))
+            (np.identity(self.data_samples) -
+                (1.0 / self.data_samples) * np.ones(self.data_samples))
+
+        # Fix centralisation - appears to be necessary but not usually
+        # mentioned in papers
+
+        Kt -= Kt.mean(0)
 
         return self.Y_offset + Kt @ self.B_RHS
