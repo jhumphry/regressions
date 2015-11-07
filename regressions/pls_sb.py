@@ -1,6 +1,4 @@
-# regressions.pls_sb
-
-"""A package which implements the PLS-SB algorithm."""
+"""A module which implements the PLS-SB algorithm."""
 
 import random
 
@@ -9,7 +7,28 @@ from . import *
 
 class PLS_SB:
 
-    """Regression using the PLS-SB algorithm."""
+    """Regression using the PLS-SB algorithm.
+
+    The PLS-SB sets up the same mathematical problem as the PLS2 module,
+    but then formulates the convergence criteria as an eigenvalue problem
+    and solves it directly. It is therefore a deterministic algorithm, but
+    has the drawback that all components must be extracted at once, even
+    if only a few are required. Note that the output of PLS-SB is not the
+    same as PLS2. In the PLS2 each component found is removed from the
+    working copies of the input matrices by a rank-1 operation so the next
+    iterations will converge on a new component. In PLS-SB all components
+    are found at once.
+
+    Args:
+        X (ndarray N x n): X calibration data, one row per data sample
+        Y (ndarray N x m): Y calibration data, one row per data sample
+        g (int): Number of components to extract
+
+    Note:
+        The attributes of the resulting class are exactly the same as for
+        ``PLS2``.
+
+    """
 
     def __init__(self, X, Y, g):
 
@@ -47,6 +66,24 @@ class PLS_SB:
         self.B = self.W @ linalg.inv(self.P.T @ self.W) @ self.C @ self.Q.T
 
     def prediction(self, Z):
+
+        """Predict the output resulting from a given input
+
+        Args:
+            Z (ndarray of floats): The input on which to make the
+                prediction. Must either be a one dimensional array of the
+                same length as the number of calibration X variables, or a
+                two dimensional array with the same number of columns as
+                the calibration X data and one row for each input row.
+
+        Returns:
+            Y (ndarray of floats) : The predicted output - either a one
+            dimensional array of the same length as the number of
+            calibration Y variables or a two dimensional array with the
+            same number of columns as the calibration Y data and one row
+            for each input row.
+        """
+
         if len(Z.shape) == 1:
             if Z.shape[0] != self.X_variables:
                 raise ParameterError('Data provided does not have the  same '
@@ -65,6 +102,28 @@ class PLS_SB:
             return result
 
     def prediction_iterative(self, Z):
+
+        """Predict the output resulting from a given input, iteratively
+
+        This produces the same output as the one-step version ``prediction``
+        but works by applying each loading in turn to extract the latent
+        variables corresponding to the input.
+
+        Args:
+            Z (ndarray of floats): The input on which to make the
+                prediction. Must either be a one dimensional array of the
+                same length as the number of calibration X variables, or a
+                two dimensional array with the same number of columns as
+                the calibration X data and one row for each input row.
+
+        Returns:
+            Y (ndarray of floats) : The predicted output - either a one
+            dimensional array of the same length as the number of
+            calibration Y variables or a two dimensional array with the
+            same number of columns as the calibration Y data and one row
+            for each input row.
+        """
+
         if len(Z.shape) == 1:
             if Z.shape[0] != self.X_variables:
                 raise ParameterError('Data provided does not have the  same '
