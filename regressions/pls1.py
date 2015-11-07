@@ -4,12 +4,17 @@ from . import *
 
 
 class PLS1:
+
     """Regression using the PLS1 algorithm.
 
-    The PLS1 algorithm forms new variables from the provided X data
-    samples which better describe the single output variable Y. If more
-    than one output variable is required then PLS1 will be run multiple
-    times.
+    The PLS1 algorithm forms a set of new latent variables from the
+    provided X and Y data samples based on criteria that balance the need
+    to explain the variance within X and Y and the covariance between X
+    and Y. Regression is then performed on the latent variables. PLS1 only
+    addresses the case of a single Y variable and if more than one output
+    variable is required then PLS1 will be run multiple times. PLS1 is a
+    deterministic algorithm that requires one iteration per component
+    extracted.
 
     Note:
         If ``ignore_failures`` is ``True`` then the resulting object
@@ -35,7 +40,7 @@ class PLS1:
         Y_variables (int): number of Y variables (=m)
         X_offset (float): Offset of calibration X data from zero
         Y_offset (float): Offset of calibration Y data from zero
-            components (int): number of components extracted (=g)
+        components (int): number of components extracted (=g)
         W (ndarray m x n x g): Weight vectors
         P (ndarray m x n x g): Loadings (Components extracted from data)
         T (ndarray m x N x g): Scores
