@@ -1,6 +1,4 @@
-# regressions.pcr
-
-"""A package which implements Principal Component Regression."""
+"""A module which implements Principal Component Regression."""
 
 import random
 
@@ -9,8 +7,69 @@ from . import *
 
 class PCR_NIPALS:
 
-    """PCR using the NIPALS (Nonlinear Iterative Partial Least Squares)
-    algorithm for finding the principal components."""
+    """Principal Components Regression using the NIPALS algorithm
+
+    PCR forms a set of new latent variables from the provided X data
+    samples which describe as much of the variance in the X data as
+    possible. The latent variables are then regressed against the provided
+    Y data. PCR is connected with Principal Components Analysis, where the
+    latent variables are referred to as Principal Components.
+
+    This class uses the Non-linear Iterative PArtial Least Squares
+    algorithm to extract the components. Either a fixed number of
+    components should be specified using the ``g`` argument, or a target
+    proportion of variation explained by the components should be
+    specified via ``variation_explained``. The variables of the X and Y
+    data can have their variances standardized. This is useful if they are
+    of heterogeneous types as otherwise the components extracted can be
+    dominated by the effects of different measurement scales rather than
+    by the actual data.
+
+    Note:
+        If ``ignore_failures`` is ``True`` then the resulting object
+        may have fewer components than requested if convergence does
+        not succeed.
+
+    Args:
+        X (ndarray N x n): X calibration data, one row per data sample
+        Y (ndarray N x m): Y calibration data, one row per data sample
+        g (int): Number of components to extract
+        variation_explained (float): Proportion of variance in X
+            calibration data that the components extracted should explain
+            (from 0.001 - 0.999)
+        standardize_X (boolean, optional): Standardize the X data
+        standardize_Y (boolean, optional): Standardize the Y data
+        max_iterations (int, optional) : Maximum number of iterations of
+            NIPALS to attempt
+        iteration_convergence (float, optional): Difference in norm
+            between two iterations at which point the iteration will be
+            considered to have converged.
+        ignore_failures (boolean, optional): Do not raise an error if
+            iteration has to be abandoned before the requested number
+            of or coverage by components has been achieved.
+
+    Attributes:
+        data_samples (int): number of calibration data samples (=N)
+        max_rank (int): maximum rank of calibration X-data (limits the
+            number of components that can be found)
+        X_variables (int): number of X variables (=n)
+        Y_variables (int): number of Y variables (=m)
+        X_offset (float): Offset of calibration X data from zero
+        Y_offset (float): Offset of calibration Y data from zero
+        standardized_X (boolean): whether X data had variance standardized
+        standardized_Y (boolean): whether Y data had variance standardized
+        X_rscaling (float): the reciprocal of the scaling factor used for X
+        Y_scaling (float): the scaling factor used for Y
+        components (int): number of components extracted (=g)
+        T (ndarray N x g): Scores
+        P (ndarray n x g): Loadings (Components extracted from data)
+        eigenvalues (ndarray g): Eigenvalues extracted
+        total_variation (float): Total variation in calibration X data
+        C (ndarray g x m): Regression coefficients
+        PgC (ndarray n x m): Precalculated matrix product of P (limited to
+            g components) and C
+
+    """
 
     def __init__(self, X, Y, g=None, variation_explained=None,
                  standardize_X=False, standardize_Y=False,
@@ -141,9 +200,36 @@ class PCR_NIPALS:
         self.eigenvalues = eig[0:self.components]
 
     def variation_explained(self):
+
+        """Return the proportion of variation explained
+
+        Returns:
+            variation_explained (float): Proportion of the total variation
+            in the X data explained by the extracted principal components.
+
+        """
+
         return self.eigenvalues.sum() / self.total_variation
 
     def prediction(self, Z):
+
+        """Predict the output resulting from a given input
+
+        Args:
+            Z (ndarray of floats): The input on which to make the
+                prediction. Must either be a one dimensional array of the
+                same length as the number of calibration X variables, or a
+                two dimensional array with the same number of columns as
+                the calibration X data and one row for each input row.
+
+        Returns:
+            Y (ndarray of floats) : The predicted output - either a one
+            dimensional array of the same length as the number of
+            calibration Y variables or a two dimensional array with the
+            same number of columns as the calibration Y data and one row
+            for each input row.
+        """
+
         if len(Z.shape) == 1:
             if Z.shape[0] != self.X_variables:
                 raise ParameterError('Data provided does not have the same '
@@ -164,7 +250,35 @@ class PCR_NIPALS:
 
 class PCR_SVD(PCR_NIPALS):
 
-    """PCR using the SVD method for finding the principal components."""
+    """Principal Components Regression using SVD
+
+    This class implements PCR with the same mathematical goals as
+    ``PCR_NIPALS`` but using a different method to extract the principal
+    components. The convergence criteria in the NIPALS algorithm can be
+    formulated into an eigenvalue problem and solved directly using an
+    existing SVD-based solver. This has the advantage of being entirely
+    deterministic, but the disadvantage that all components have to be
+    extracted each time, even if only a few are required to explain most
+    of the variance in X.
+
+    Note:
+        The attributes of the resulting class are exactly the same as for
+        ``PCR_NIPALS``.
+
+    Args:
+        X (ndarray N x n): X calibration data, one row per data sample
+        Y (ndarray N x m): Y calibration data, one row per data sample
+        g (int): Number of components to extract
+        variation_explained (float): Proportion of variance in X
+            calibration data that the components extracted should explain
+            (from 0.001 - 0.999)
+        standardize_X (boolean, optional): Standardize the X data
+        standardize_Y (boolean, optional): Standardize the Y data
+        max_iterations  : Not relevant for SVD
+        iteration_convergence : Not relevant for SVD
+        ignore_failures: Not relevant for SVD
+
+    """
 
     def _perform_pca(self, X, g=None, variation_explained=None,
                      max_iterations=DEFAULT_MAX_ITERATIONS,
