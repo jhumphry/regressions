@@ -1,6 +1,4 @@
-# regressions.kernel_pls
-
-"""A package which implements kernel PLS."""
+"""A module which implements kernel PLS."""
 
 import random
 
@@ -9,7 +7,54 @@ from . import *
 
 class Kernel_PLS:
 
-    """Regression using kernel PLS."""
+    """Non-linear Kernel PLS regression using the PLS2 algorithm
+
+    This class implements kernel PLS regression by transforming the input
+    X data into feature space by applying a kernel function between each
+    pair of inputs. The kernel function provided will be called with two
+    vectors and should return a float. Kernels should be symmetrical with
+    regard to the order in which the vectors are supplied. The PLS2
+    algorithm is then applied to the transformed data. The application of
+    the kernel function means that non-linear transformations are
+    possible.
+
+    Note:
+        If ``ignore_failures`` is ``True`` then the resulting object
+        may have fewer components than requested if convergence does
+        not succeed.
+
+    Args:
+        X (ndarray N x n): X calibration data, one row per data sample
+        Y (ndarray N x m): Y calibration data, one row per data sample
+        g (int): Number of components to extract
+        X_kernel (function): Kernel function
+        max_iterations (int, optional) : Maximum number of iterations of
+            NIPALS to attempt
+        iteration_convergence (float, optional): Difference in norm
+            between two iterations at which point the iteration will be
+            considered to have converged.
+        ignore_failures (boolean, optional): Do not raise an error if
+            iteration has to be abandoned before the requested number
+            of components have been recovered
+
+    Attributes:
+        data_samples (int): number of calibration data samples (=N)
+        max_rank (int): maximum rank of calibration X-data (limits the
+            number of components that can be found)
+        X_variables (int): number of X variables (=n)
+        Y_variables (int): number of Y variables (=m)
+        X_offset (float): Offset of calibration X data from zero
+        Y_offset (float): Offset of calibration Y data from zero
+        components (int): number of components extracted (=g)
+        X_training_set (ndarray N x n): X calibration data
+        K (ndarray N x N): X calibration data transformed into feature space
+        P (ndarray n x g): Loadings on K (Components extracted from data)
+        Q (ndarray m x g): Loadings on Y (Components extracted from data)
+        T (ndarray N x g): Scores on K
+        U (ndarray N x g): Scores on Y
+        B_RHS (ndarray n x m): Partial regression matrix
+
+    """
 
     def __init__(self, X, Y, g, X_kernel,
                  max_iterations=DEFAULT_MAX_ITERATIONS,
