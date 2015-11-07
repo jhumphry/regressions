@@ -81,8 +81,10 @@ class Kernel_PLS:
 
         K = np.empty((self.data_samples, self.data_samples))
         for i in range(0, self.data_samples):
-            for j in range(0, self.data_samples):
+            for j in range(0, i):
                 K[i, j] = X_kernel(X[i, :], X[j, :])
+                K[j, i] = K[i, j]
+            K[i, i] = X_kernel(X[i, :], X[i, :])
 
         centralizer = (np.identity(self.data_samples)) - \
             (1.0 / self.data_samples) * \
