@@ -20,6 +20,12 @@ class Kernel_PLS:
             raise ParameterError('X and Y data must have the same '
                                  'number of rows (data samples)')
 
+        if len(X.shape) == 1:
+            X = X.reshape((X.shape[0], 1))
+
+        if len(Y.shape) == 1:
+            Y = Y.reshape((Y.shape[0], 1))
+
         self.max_rank = min(X.shape)
         self.data_samples = X.shape[0]
         self.X_variables = X.shape[1]
@@ -101,13 +107,36 @@ class Kernel_PLS:
         self.B_RHS = self.U @ linalg.inv(self.T.T @ self.K @ self.U) @ self.Q.T
 
     def prediction(self, Z):
+        """Predict the output resulting from a given input
+
+        Args:
+            Z (ndarray of floats): The input on which to make the
+                prediction. A one-dimensional array will be interpreted as
+                a single multi-dimensional input unless the number of X
+                variables in the calibration data was 1, in which case it
+                will be interpreted as a set of inputs. A two-dimensional
+                array will be interpreted as one multi-dimensional input
+                per row.
+
+        Returns:
+            Y (ndarray of floats) : The predicted output - either a one
+            dimensional array of the same length as the number of
+            calibration Y variables or a two dimensional array with the
+            same number of columns as the calibration Y data and one row
+            for each input row.
+        """
+
         if len(Z.shape) == 1:
-            if Z.shape[0] != self.X_variables:
-                raise ParameterError('Data provided does not have the  same '
-                                     'number of variables as the original X '
-                                     'data')
-            Kt = np.empty((1, self.data_samples))
-            Z = Z.reshape((1, Z.shape[0]))
+            if self.X_variables == 1:
+                Z = Z.reshape((Z.shape[0], 1))
+                Kt = np.empty((Z.shape[0], self.data_samples))
+            else:
+                if Z.shape[0] != self.X_variables:
+                    raise ParameterError('Data provided does not have the '
+                                         'same number of variables as the '
+                                         'original X data')
+                Z = Z.reshape((1, Z.shape[0]))
+                Kt = np.empty((1, self.data_samples))
         else:
             if Z.shape[1] != self.X_variables:
                 raise ParameterError('Data provided does not have the  same '

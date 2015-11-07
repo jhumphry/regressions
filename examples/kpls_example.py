@@ -25,12 +25,12 @@ kern = kernels.make_gaussian_kernel(width=1.8)
 
 # Create sample data
 
-x_values = np.linspace(0.0, 3.5, 100).reshape((100, 1))
+x_values = np.linspace(0.0, 3.5, 100)
 
 z_pure = z(x_values)
 z_pure -= z_pure.mean(0)  # Ensure z_pure is centered
 
-noise = np.random.normal(loc=0.0, scale=0.2, size=100).reshape((100, 1))
+noise = np.random.normal(loc=0.0, scale=0.2, size=100)
 z_noisy = z_pure + noise
 z_noisy -= z_noisy.mean(0)  # Ensure z_noisy is centered
 

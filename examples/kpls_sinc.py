@@ -19,14 +19,12 @@ from regressions import kernel_pls, kernels
 # components
 
 x_values = np.linspace(-10.0, 10.0, 100)
-x_values_matrix = x_values.copy().reshape((100, 1))
 
 pure_sinc = np.sin(np.abs(x_values)) / np.abs(x_values)
 pure_sinc -= pure_sinc.mean()
-pure_sinc_matrix = pure_sinc.copy().reshape((100, 1))
 
-pure_kpls = kernel_pls.Kernel_PLS(X=x_values_matrix,
-                                  Y=pure_sinc_matrix,
+pure_kpls = kernel_pls.Kernel_PLS(X=x_values,
+                                  Y=pure_sinc,
                                   g=4,
                                   X_kernel=kernels.std_gaussian)
 
@@ -35,18 +33,17 @@ pure_kpls = kernel_pls.Kernel_PLS(X=x_values_matrix,
 
 noisy_sinc = pure_sinc + np.random.normal(loc=0.0, scale=0.2, size=100)
 noisy_sinc -= noisy_sinc.mean()
-noisy_sinc_matrix = noisy_sinc.copy().reshape((100, 1))
 
-noisy_kpls = kernel_pls.Kernel_PLS(X=x_values_matrix,
-                                   Y=noisy_sinc_matrix,
+noisy_kpls = kernel_pls.Kernel_PLS(X=x_values,
+                                   Y=noisy_sinc,
                                    g=1,
                                    X_kernel=kernels.std_gaussian)
 
 # Choose some test points and use the kernel PLS results to predict /
 # reconstruct the true output of the sinc function
 
-test_x = np.linspace(-10.0, 10.0, 80).reshape((80, 1))
-test_y = (np.sin(np.abs(test_x)) / np.abs(test_x)).reshape((80, 1))
+test_x = np.linspace(-10.0, 10.0, 80)
+test_y = (np.sin(np.abs(test_x)) / np.abs(test_x))
 test_kpls_reconstruction = noisy_kpls.prediction(test_x)
 
 # Perform PLS on the calibration data with a range of numbers of components and
@@ -54,8 +51,8 @@ test_kpls_reconstruction = noisy_kpls.prediction(test_x)
 
 test_mse = np.empty((30,))
 for i in range(1, 31):
-    test_kpls = kernel_pls.Kernel_PLS(X=x_values_matrix,
-                                      Y=noisy_sinc_matrix,
+    test_kpls = kernel_pls.Kernel_PLS(X=x_values,
+                                      Y=noisy_sinc,
                                       g=i,
                                       X_kernel=kernels.std_gaussian)
     prediction = test_kpls.prediction(test_x)
