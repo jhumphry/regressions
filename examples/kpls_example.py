@@ -7,6 +7,8 @@ Reproduces figure 3 from "Overview and Recent Advances in Partial Least
 Squares" Roman Rosipal and Nicole Krämer SLSFS 2005, LNCS 3940, pp. 34–51,
 2006. """
 
+# Copyright (c) 2015, James Humphry - see LICENSE file for details
+
 import math
 import random
 

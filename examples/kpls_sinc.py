@@ -7,6 +7,8 @@ Reproduces some of the figures from "Kernel Partial Least Squares Regression
 in Reproducing Kernel Hilbert Space" by Roman Rosipal and Leonard J Trejo.
 Journal of Machine Learning Research 2 (2001) 97-123"""
 
+# Copyright (c) 2015, James Humphry - see LICENSE file for details
+
 import math
 import random
 

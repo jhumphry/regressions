@@ -14,6 +14,8 @@ samples in each. Currently missing data or NaN are not supported.
 
 """
 
+# Copyright (c) 2015, James Humphry - see LICENSE file for details
+
 import numpy as np
 try:
     import scipy.linalg as linalg
