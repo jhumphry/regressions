@@ -12,40 +12,6 @@ All of the regressions require the X and Y data to be provided in the form
 of matrices, with one row per data sample and the same number of data
 samples in each. Currently missing data or NaN are not supported.
 
-Available modules
----------------------
-mlr
-    Standard Multiple Linear Regression for data with homoskedastic and
-    serially uncorrelated errors.
-cls
-    Classical Least Squares - equivalent to multiple linear regression but
-    with the regression computed in reverse (X on Y) and then
-    (pseudo-)inverted.
-pcr
-    Principal Component Regression - based on extracting a limited number
-    of components of the X data which best span the variance in X, and
-    then regressing Y on only those components. Both iterative (NIPALS)
-    and SVD approaches are implemented.
-pls1
-    Partial Least Squares based on the PLS1 algorithm for use with only
-    one Y variable but multiple X variables. Multiple Y variables are
-    handled completely independently from each other, without using
-    information about correlations. Uses an iterative approach.
-pls2
-    Partial Least Squares based on the PLS2 algorithm for use with
-    multiple X and Y variables simultaneously.  Uses an iterative
-    approach.
-pls_sb
-    Partial Least Squares based on the PLS-SB algorithm. This sets up the
-    problem in the same way as the PLS2 algorithm but then solves for the
-    eigenvectors directly, with a non-iterative deterministic approach.
-kernel_pls
-    Transforms the input X data into a higher-dimensional feature space
-    using a provided kernel, and then applies the PLS2 algorithm. This
-    allows non-linear problems to be addressed.
-kernels
-    A collection of kernels to use with kernel_pls
-
 """
 
 import numpy as np
