@@ -253,17 +253,17 @@ class PCR_SVD(PCR_NIPALS):
     """Principal Components Regression using SVD
 
     This class implements PCR with the same mathematical goals as
-    ``PCR_NIPALS`` but using a different method to extract the principal
-    components. The convergence criteria in the NIPALS algorithm can be
-    formulated into an eigenvalue problem and solved directly using an
-    existing SVD-based solver. This has the advantage of being entirely
+    :py:class:`PCR_NIPALS` but using a different method to extract the
+    principal components. The convergence criteria in the NIPALS algorithm
+    can be formulated into an eigenvalue problem and solved directly using
+    an existing SVD-based solver. This has the advantage of being entirely
     deterministic, but the disadvantage that all components have to be
     extracted each time, even if only a few are required to explain most
     of the variance in X.
 
     Note:
         The attributes of the resulting class are exactly the same as for
-        ``PCR_NIPALS``.
+        :py:class:`PCR_NIPALS`.
 
     Args:
         X (ndarray N x n): X calibration data, one row per data sample

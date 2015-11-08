@@ -26,7 +26,7 @@ class PLS_SB:
 
     Note:
         The attributes of the resulting class are exactly the same as for
-        ``PLS2``.
+        :py:class:`PLS2`.
 
     """
 
