@@ -5,7 +5,8 @@ a function z(x) = 4.26(exp (−x) − 4 exp (−2x) + 3 exp (−3x))
 
 Reproduces figure 3 from "Overview and Recent Advances in Partial Least
 Squares" Roman Rosipal and Nicole Krämer SLSFS 2005, LNCS 3940, pp. 34–51,
-2006. """
+2006 and figure 3 from "Nonlinear Partial Least Squares: An Overview" Roman
+Rosipal """
 
 # Copyright (c) 2015, James Humphry - see LICENSE file for details
 
@@ -72,3 +73,30 @@ plt.plot(x_values, kpls_8_results, 'k-.', label='KPLS 8C')
 plt.legend(loc=4)
 
 plt.show()
+fig.clear()
+
+# Plot some of the extracted components
+
+# These figures plot the underlying function based on 100 (xi, z(xi)) pairs
+# as a dotted line in the original problem space. The component extracted
+# is a single vector in the 100-dimensional transformed feature space. Each
+# dimension in feature space corresponds to a K(?, xi) kernel function. As
+# the kernel in this case is the Gaussian kernel which is spacially
+# localised, it is workable to map each K(?, xi) function to the
+# x-cordinate xi for display in this manner. In the general case,
+# meaningfully plotting the components in kernel space is likely to be
+# difficult.
+
+fig = plt.figure('Components found in Kernel PLS regression')
+
+fig.set_tight_layout(True)
+
+for i in range(0, 8):
+    plt.subplot(4, 2, (i+1))
+    plt.title('Kernel PLS component {}'.format((i+1)))
+    plt.plot(x_values, z_pure, 'k--')
+    plt.plot(x_values, kpls_8.P[:, i], 'k-')
+    plt.gca().set_ybound(lower=-1.5, upper=1.0)
+
+plt.show()
+fig.clear()
