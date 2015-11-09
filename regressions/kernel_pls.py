@@ -113,8 +113,8 @@ class Kernel_PLS:
             while iteration_count < max_iterations and \
                     iteration_change > iteration_convergence:
 
-                t_j = K_j @ u_j
-                t_j /= np.linalg.norm(t_j, 2)
+                w_j = K_j @ u_j
+                t_j = w_j / np.linalg.norm(w_j, 2)
 
                 q_j = Y_j.T @ t_j
 
@@ -136,8 +136,7 @@ class Kernel_PLS:
             Q[:, j] = q_j
             U[:, j] = u_j
 
-            t_dot_t = t_j.T @ t_j
-            P[:, j] = (K_j.T @ t_j) / t_dot_t
+            P[:, j] = (K_j.T @ w_j) / (w_j @ w_j)
             tmp = (np.identity(self.data_samples) - np.outer(t_j.T, t_j))
             K_j = tmp @ K_j @ tmp
             Y_j = Y_j - np.outer(t_j, q_j.T)
