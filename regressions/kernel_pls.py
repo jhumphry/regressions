@@ -137,8 +137,8 @@ class Kernel_PLS:
             U[:, j] = u_j
 
             P[:, j] = (K_j.T @ w_j) / (w_j @ w_j)
-            tmp = (np.identity(self.data_samples) - np.outer(t_j.T, t_j))
-            K_j = tmp @ K_j @ tmp
+            deflator = (np.identity(self.data_samples) - np.outer(t_j.T, t_j))
+            K_j = deflator @ K_j @ deflator
             Y_j = Y_j - np.outer(t_j, q_j.T)
             self.components += 1
 
