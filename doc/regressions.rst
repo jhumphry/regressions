@@ -77,3 +77,11 @@ regressions.kernels module
     :members:
     :undoc-members:
     :show-inheritance:
+
+regressions.press module
+------------------------
+
+.. automodule:: regressions.press
+    :members:
+    :undoc-members:
+    :show-inheritance:
