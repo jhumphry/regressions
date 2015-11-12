@@ -5,7 +5,7 @@ import random
 from . import *
 
 
-class Kernel_PLS:
+class Kernel_PLS(RegressionBase):
 
     """Non-linear Kernel PLS regression using the PLS2 algorithm
 
@@ -38,15 +38,8 @@ class Kernel_PLS:
             of components have been recovered
 
     Attributes:
-        data_samples (int): number of calibration data samples (=N)
-        max_rank (int): maximum rank of calibration X-data (limits the
-            number of components that can be found)
-        X_variables (int): number of X variables (=n)
-        Y_variables (int): number of Y variables (=m)
-        X_offset (float): Offset of calibration X data from zero
-        Y_offset (float): Offset of calibration Y data from zero
         components (int): number of components extracted (=g)
-        X_training_set (ndarray N x n): X calibration data
+        X_training_set (ndarray N x n): X calibration data (centred)
         K (ndarray N x N): X calibration data transformed into feature space
         P (ndarray n x g): Loadings on K (Components extracted from data)
         Q (ndarray m x g): Loadings on Y (Components extracted from data)
@@ -61,39 +54,23 @@ class Kernel_PLS:
                  iteration_convergence=DEFAULT_EPSILON,
                  ignore_failures=True):
 
-        if X.shape[0] != Y.shape[0]:
-            raise ParameterError('X and Y data must have the same '
-                                 'number of rows (data samples)')
+        Xc, Yc = super()._prepare_data(X, Y)
 
-        if len(X.shape) == 1:
-            X = X.reshape((X.shape[0], 1))
-
-        if len(Y.shape) == 1:
-            Y = Y.reshape((Y.shape[0], 1))
-
-        self.max_rank = min(X.shape)
-        self.data_samples = X.shape[0]
-        self.X_variables = X.shape[1]
-        self.Y_variables = Y.shape[1]
-
-        self.X_training_set = X
+        self.X_training_set = Xc
         self.X_kernel = X_kernel
 
         K = np.empty((self.data_samples, self.data_samples))
         for i in range(0, self.data_samples):
             for j in range(0, i):
-                K[i, j] = X_kernel(X[i, :], X[j, :])
+                K[i, j] = X_kernel(Xc[i, :], Xc[j, :])
                 K[j, i] = K[i, j]
-            K[i, i] = X_kernel(X[i, :], X[i, :])
+            K[i, i] = X_kernel(Xc[i, :], Xc[i, :])
 
         centralizer = (np.identity(self.data_samples)) - \
             (1.0 / self.data_samples) * \
             np.ones((self.data_samples, self.data_samples))
         K = centralizer @ K @ centralizer
         self.K = K
-
-        self.Y_offset = Y.mean(0)
-        Yc = Y - self.Y_offset  # Yc is the centred version of Y
 
         T = np.empty((self.data_samples, g))
         Q = np.empty((self.Y_variables, g))
@@ -192,7 +169,8 @@ class Kernel_PLS:
 
         for i in range(0, Z.shape[0]):
             for j in range(0, self.data_samples):
-                Kt[i, j] = self.X_kernel(Z[i, :], self.X_training_set[j, :])
+                Kt[i, j] = self.X_kernel(Z[i, :] - self.X_offset,
+                                         self.X_training_set[j, :])
 
         centralizer = (1.0 / self.data_samples) * \
             np.ones((Z.shape[0], self.data_samples))
