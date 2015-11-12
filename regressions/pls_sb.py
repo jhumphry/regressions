@@ -5,7 +5,7 @@ import random
 from . import *
 
 
-class PLS_SB:
+class PLS_SB(RegressionBase):
 
     """Regression using the PLS-SB algorithm.
 
@@ -26,29 +26,18 @@ class PLS_SB:
 
     Note:
         The attributes of the resulting class are exactly the same as for
-        :py:class:`PLS2`.
+        :py:class:`pls2.PLS2`.
 
     """
 
     def __init__(self, X, Y, g):
 
-        if X.shape[0] != Y.shape[0]:
-            raise ParameterError('X and Y data must have the same '
-                                 'number of rows (data samples)')
-
-        self.max_rank = min(X.shape)
-        self.data_samples = X.shape[0]
-        self.X_variables = X.shape[1]
-        self.Y_variables = Y.shape[1]
+        Xc, Yc = super()._prepare_data(X, Y)
 
         if g < 1 or g > self.max_rank:
             raise ParameterError('Number of required components '
                                  'specified is impossible.')
         self.components = g
-        self.X_offset = X.mean(0)
-        Xc = X - self.X_offset  # Xc is the centred version of X
-        self.Y_offset = Y.mean(0)
-        Yc = Y - self.Y_offset  # Yc is the centred version of Y
 
         XtY = Xc.T @ Yc
         ev, W = linalg.eigh(XtY @ XtY.T)

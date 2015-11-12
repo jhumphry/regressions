@@ -3,7 +3,7 @@
 from . import *
 
 
-class PLS1:
+class PLS1(RegressionBase):
 
     """Regression using the PLS1 algorithm.
 
@@ -33,13 +33,6 @@ class PLS1:
             of components have been recovered
 
     Attributes:
-        data_samples (int): number of calibration data samples (=N)
-        max_rank (int): maximum rank of calibration X-data (limits the
-            number of components that can be found)
-        X_variables (int): number of X variables (=n)
-        Y_variables (int): number of Y variables (=m)
-        X_offset (float): Offset of calibration X data from zero
-        Y_offset (float): Offset of calibration Y data from zero
         components (int): number of components extracted (=g)
         W (ndarray m x n x g): Weight vectors
         P (ndarray m x n x g): Loadings (Components extracted from data)
@@ -52,27 +45,11 @@ class PLS1:
     def __init__(self, X, Y, g,
                  epsilon=DEFAULT_EPSILON, ignore_failures=False):
 
-        if X.shape[0] != Y.shape[0]:
-            raise ParameterError('X and Y data must have the same '
-                                 'number of rows (data samples)')
-
-        if len(Y.shape) == 1:
-            Y = Y.reshape((Y.shape[0], 1))
-
-        self.max_rank = min(X.shape)
-        self.data_samples = X.shape[0]
-        self.X_variables = X.shape[1]
-        self.Y_variables = Y.shape[1]
+        Xc, Yc = super()._prepare_data(X, Y)
 
         if g < 1 or g > self.max_rank:
             raise ParameterError('Number of required components '
                                  'specified is impossible.')
-
-        self.X_offset = X.mean(0)
-        Xc = X - self.X_offset  # Xc is the centred version of X
-        self.Y_offset = Y.mean(0)
-        Yc = Y - self.Y_offset  # Yc is the centred version of Y
-
         self.components = g
 
         W = np.empty((self.Y_variables, self.X_variables, g))

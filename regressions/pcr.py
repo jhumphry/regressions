@@ -5,7 +5,7 @@ import random
 from . import *
 
 
-class PCR_NIPALS:
+class PCR_NIPALS(RegressionBase):
 
     """Principal Components Regression using the NIPALS algorithm
 
@@ -49,17 +49,6 @@ class PCR_NIPALS:
             of or coverage by components has been achieved.
 
     Attributes:
-        data_samples (int): number of calibration data samples (=N)
-        max_rank (int): maximum rank of calibration X-data (limits the
-            number of components that can be found)
-        X_variables (int): number of X variables (=n)
-        Y_variables (int): number of Y variables (=m)
-        X_offset (float): Offset of calibration X data from zero
-        Y_offset (float): Offset of calibration Y data from zero
-        standardized_X (boolean): whether X data had variance standardized
-        standardized_Y (boolean): whether Y data had variance standardized
-        X_rscaling (float): the reciprocal of the scaling factor used for X
-        Y_scaling (float): the scaling factor used for Y
         components (int): number of components extracted (=g)
         T (ndarray N x g): Scores
         P (ndarray n x g): Loadings (Components extracted from data)
@@ -77,13 +66,6 @@ class PCR_NIPALS:
                  iteration_convergence=DEFAULT_EPSILON,
                  ignore_failures=True):
 
-        if X.shape[0] != Y.shape[0]:
-            raise ParameterError('X and Y data must have the same number of '
-                                 'rows (data samples)')
-
-        if len(Y.shape) == 1:
-            Y = Y.reshape((Y.shape[0], 1))
-
         if (g is None) == (variation_explained is None):
             raise ParameterError('Must specify either the number of principal '
                                  'components g to use or the proportion of '
@@ -97,28 +79,16 @@ class PCR_NIPALS:
                                      'than 0.1% or more than 99.9% of the '
                                      'variation in the data.')
 
-        self.max_rank = min(X.shape)
-        self.data_samples = X.shape[0]
-        self.X_variables = X.shape[1]
-        self.Y_variables = Y.shape[1]
-        self.standardized_X = standardize_X
-        self.standardized_Y = standardize_Y
+        Xc, Yc = super()._prepare_data(X, Y, standardize_X, standardize_Y)
 
         if g is not None:
             if g < 1 or g > self.max_rank:
                 raise ParameterError('Number of required components specified '
                                      'is impossible.')
 
-        self.X_offset = X.mean(0)
-        Xc = X - self.X_offset
         if standardize_X:
-            # The reciprocals of the standard deviations of each column are
-            # stored as these are what are needed for fast prediction
-            self.X_rscaling = 1.0 / Xc.std(0, ddof=1)
-            Xc *= self.X_rscaling
             self.total_variation = self.X_variables * (self.data_samples - 1.0)
         else:
-            self.X_rscaling = None
             self.total_variation = (Xc @ Xc.T).trace()
 
         self._perform_pca(Xc, g, variation_explained,
