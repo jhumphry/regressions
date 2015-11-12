@@ -3,7 +3,7 @@
 from . import *
 
 
-def PRESS(R, X, Y, g, others=None, relative=False):
+def PRESS(R, X, Y, others=None, relative=False):
     """Implements the Predicted Residual Error Sum of Squares
 
     This function calculates the PRESS statistic for a given regression
@@ -18,7 +18,6 @@ def PRESS(R, X, Y, g, others=None, relative=False):
         R (class): A regression class
         X (ndarray N x n): X calibration data, one row per data sample
         Y (ndarray N x m): Y calibration data, one row per data sample
-        g (int): Number of components to extract
         others (dict, optional): A dict of other parameters to send to the
             regression class constructor.
         relative (boolean, optional): whether to divide the error by the
@@ -44,6 +43,13 @@ def PRESS(R, X, Y, g, others=None, relative=False):
         raise ParameterError('There must be at least two data samples to '
                              'produce the PRESS statistic.')
 
+    # Change 1-D arrays into column vectors
+    if len(X.shape) == 1:
+        X = X.reshape((X.shape[0], 1))
+
+    if len(Y.shape) == 1:
+        Y = Y.reshape((Y.shape[0], 1))
+
     Xp = np.empty((X.shape[0] - 1, X.shape[1]))
     Yp = np.empty((Y.shape[0] - 1, Y.shape[1]))
     Yhat = np.empty(Y.shape)
@@ -53,7 +59,7 @@ def PRESS(R, X, Y, g, others=None, relative=False):
         Xp[i:, :] = X[i+1:, :]
         Yp[0:i, :] = Y[0:i, :]
         Yp[i:, :] = Y[i+1:, :]
-        model = R(X=Xp, Y=Yp, g=g, **others)
+        model = R(X=Xp, Y=Yp, **others)
         Yhat[i, :] = model.prediction(Z=X[i, :])
 
     if relative:
