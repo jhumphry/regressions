@@ -78,10 +78,10 @@ regressions.kernels module
     :undoc-members:
     :show-inheritance:
 
-regressions.press module
+regressions.fitstats module
 ------------------------
 
-.. automodule:: regressions.press
+.. automodule:: regressions.fitstats
     :members:
     :undoc-members:
     :show-inheritance:

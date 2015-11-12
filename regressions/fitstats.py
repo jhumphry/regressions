@@ -1,4 +1,4 @@
-"""A module which implements PRESS."""
+"""A module which implements goodness-of-fit statistics."""
 
 from . import *
 

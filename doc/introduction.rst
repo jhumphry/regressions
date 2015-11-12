@@ -48,7 +48,7 @@ Overview of modules available
     allows non-linear problems to be addressed.
 :py:mod:`regressions.kernels`
     A collection of kernels to use with kernel_pls
-:py:mod:`regressions.press`
-    An implementation of the PRESS statistic to help choose an appropriate
-    number of components to extract in PCR or PLS without over-fitting to
-    the calibration data.
+:py:mod:`regressions.fitstats`
+    An implementation of statistical tests to help users choose an
+    appropriate number of components to extract in PCR or PLS without
+    over-fitting to the calibration data.
