@@ -1,5 +1,11 @@
 """A module which implements goodness-of-fit statistics."""
 
+try:
+    import scipy.stats
+    _stats_available = True
+except ImportError:
+    _stats_available = False
+
 from . import *
 
 
@@ -195,3 +201,55 @@ def Q2(R, X, Y, others=None):
     """
 
     return (1.0 - PRESS(R, X, Y, others, relative=False) / SS(Y))
+
+
+def residuals_QQ(Y):
+    """Function for creating normal Q-Q probability plots of residuals
+
+    This function is used to explore the residuals left over after a
+    regression model has been fitted to some calibration data. The input
+    is a matrix of residuals created by subtracting the true Y calibration
+    values from the Y values predicted by the regression model when the X
+    calibration values are input. Each column represents a variable of Y,
+    and in turn each is centered, divided by the standard deviation of the
+    values in the column and sorted.
+
+    Theoretical quantiles from the normal distribution and the sample
+    quantiles for each Y variable are returned. When the theoretical
+    quantiles are plotted against the sample quantiles for any of the Y
+    variables, a Q-Q plot is producted. If the residuals are normally
+    distributed, the points should lie on a straight line through the
+    origin.
+
+    Requires 'SciPy' to be available.
+
+    Args:
+        Y (ndarray N x m): Matrix of residuals
+
+    Returns:
+        X, Y (tuple of ndarray N and ndarray N x m): The theoretical
+        quantiles from the normal distribution and the sample quantiles
+        from the normal distribution
+
+    Raises:
+        NotImplementedError: SciPy is not available
+
+    """
+
+    if not _stats_available:
+        raise NotImplementedError("This function requires SciPy")
+
+    # Change 1-D array into column vector
+    if len(Y.shape) == 1:
+        Y = Y.reshape((Y.shape[0], 1))
+
+    Yc = (Y - Y.mean(0))
+    Yc /= Yc.std(0)
+    Yc.sort(0)
+
+    samples = Y.shape[0]
+    X = np.empty((samples))
+    for i in range(0, samples):
+        X[i] = scipy.stats.norm.ppf(1.0 / (samples+1) * (i+1))
+
+    return X, Yc
