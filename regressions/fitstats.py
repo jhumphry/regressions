@@ -3,6 +3,29 @@
 from . import *
 
 
+def SS(Y):
+    """Implements the Sum of Squares
+
+    This function calculates the sum of the squared input data. The input
+    data is first centered by subtracting the mean.
+
+    Args:
+        Y (ndarray N x m): Y calibration data, one row per data sample
+
+    Returns:
+        SS (float): The sum of the squares of the input data.
+
+    """
+
+    # Change 1-D array into column vector
+    if len(Y.shape) == 1:
+        Y = Y.reshape((Y.shape[0], 1))
+
+    Yc = Y - Y.mean(0)
+
+    return (Yc**2.0).sum()
+
+
 def RESS(R, X, Y, others=None, relative=False):
     """Implements the Residual Error Sum of Squares
 
@@ -53,6 +76,34 @@ def RESS(R, X, Y, others=None, relative=False):
         return (((Yhat - Y) / Y)**2).sum()
     else:
         return ((Yhat - Y)**2).sum()
+
+
+def R2(R, X, Y, others=None):
+    """Implements the R**2 statistic
+
+    This function calculates the R**2 statistic for a given regression
+    class and a set of calibration data. This is equal to (1-RESS/SS),
+    which gives an indication of how much of the initial variation in the
+    (centered) Y data is explained by the regression model after it has
+    been trained on the same Y data. Note that an overfitted model can
+    have a very large R**2 but poor generalisation performance. The
+    :py:func:`Q2` statistic looks at how much variance in each part of the
+    Y data is explained by the regression model trained on only the other
+    parts of the Y data so is more robust against overfitting.
+
+    Args:
+        R (class): A regression class
+        X (ndarray N x n): X calibration data, one row per data sample
+        Y (ndarray N x m): Y calibration data, one row per data sample
+        others (dict, optional): A dict of other parameters to send to the
+            regression class constructor.
+
+    Returns:
+        R2 (float): The R2 statistic.
+
+    """
+
+    return (1.0 - RESS(R, X, Y, others, relative=False) / SS(Y))
 
 
 def PRESS(R, X, Y, others=None, relative=False):
@@ -118,3 +169,29 @@ def PRESS(R, X, Y, others=None, relative=False):
         return (((Yhat - Y) / Y)**2).sum()
     else:
         return ((Yhat - Y)**2).sum()
+
+
+def Q2(R, X, Y, others=None):
+    """Implements the Q**2 statistic
+
+    This function calculates the Q**2 statistic for a given regression
+    class and a set of calibration data. This is equal to (1-PRESS/SS),
+    which gives an indication of how much of the initial variation in each
+    part of the (centered) Y data is explained by the regression model
+    trained on the other parts of the Y data. This attempts to ensure that
+    regression models with a tendency to over-fit training data are not
+    favoured.
+
+    Args:
+        R (class): A regression class
+        X (ndarray N x n): X calibration data, one row per data sample
+        Y (ndarray N x m): Y calibration data, one row per data sample
+        others (dict, optional): A dict of other parameters to send to the
+            regression class constructor.
+
+    Returns:
+        Q2 (float): The Q2 statistic.
+
+    """
+
+    return (1.0 - PRESS(R, X, Y, others, relative=False) / SS(Y))
