@@ -79,7 +79,7 @@ regressions.kernels module
     :show-inheritance:
 
 regressions.fitstats module
-------------------------
+---------------------------
 
 .. automodule:: regressions.fitstats
     :members:
