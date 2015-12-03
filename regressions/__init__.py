@@ -47,11 +47,11 @@ class ConvergenceError(Exception):
     """
     pass
 
-DEFAULT_MAX_ITERATIONS = 100
+DEFAULT_MAX_ITERATIONS = 250
 """Default maximum number of iterations that iterative routines will
 attempt before raising a ConvergenceError."""
 
-DEFAULT_EPSILON = 0.001
+DEFAULT_EPSILON = 1.0E-6
 """A default epsilon value used in various places, such as to decide when
 iterations have converged sufficiently."""
 
