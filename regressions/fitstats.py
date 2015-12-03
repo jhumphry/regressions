@@ -112,21 +112,22 @@ def R2(R, X, Y, others=None):
     return (1.0 - RESS(R, X, Y, others, relative=False) / SS(Y))
 
 
-def PRESS(R, X, Y, others=None, relative=False):
+def PRESS(R, X, Y, groups=4, others=None, relative=False):
     """Implements the Predicted Residual Error Sum of Squares
 
     This function calculates the PRESS statistic for a given regression
-    class and a set of calibration data. Each sample in turn is removed
-    from the data, the regression model is trained on the remaining data
-    and then used to predict the Y value of the sample that was removed.
-    Once a full set of Y predictions has been produced, the sum of the
-    squared difference between them and the true Y data is the PRESS
-    statistic.
+    class and a set of calibration data. Each groups of samples in turn is
+    removed from the data set, the regression model is trained on the
+    remaining data, and then is used to predict the Y values of the
+    samples that were removed. Once a full set of Y predictions has been
+    produced, the sum of the squared difference between them and the true
+    Y data is the PRESS statistic.
 
     Args:
         R (class): A regression class
         X (ndarray N x n): X calibration data, one row per data sample
         Y (ndarray N x m): Y calibration data, one row per data sample
+        groups (int, optional): Number of cross-validation groups to use
         others (dict, optional): A dict of other parameters to send to the
             regression class constructor.
         relative (boolean, optional): whether to divide the error by the
@@ -152,6 +153,19 @@ def PRESS(R, X, Y, others=None, relative=False):
         raise ParameterError('There must be at least two data samples to '
                              'produce the PRESS statistic.')
 
+    if data_samples < groups:
+        raise ParameterError('There must be at least as many data samples as '
+                             'cross-validation groups')
+
+    if groups < 2:
+        raise ParameterError('There must be at least two cross-validation '
+                             'groups')
+
+    group_size = data_samples // groups
+    start_indexes = [x*group_size for x in range(0, groups)]
+    end_indexes = [x*group_size for x in range(1, groups+1)]
+    end_indexes[-1] = data_samples  # Last group may be bigger
+
     # Change 1-D arrays into column vectors
     if len(X.shape) == 1:
         X = X.reshape((X.shape[0], 1))
@@ -159,17 +173,23 @@ def PRESS(R, X, Y, others=None, relative=False):
     if len(Y.shape) == 1:
         Y = Y.reshape((Y.shape[0], 1))
 
-    Xp = np.empty((X.shape[0] - 1, X.shape[1]))
-    Yp = np.empty((Y.shape[0] - 1, Y.shape[1]))
     Yhat = np.empty(Y.shape)
 
-    for i in range(0, data_samples):
-        Xp[0:i, :] = X[0:i, :]
-        Xp[i:, :] = X[i+1:, :]
-        Yp[0:i, :] = Y[0:i, :]
-        Yp[i:, :] = Y[i+1:, :]
+    for i in range(0, groups):
+
+        samples_excluding_group = data_samples - \
+            (end_indexes[i]-start_indexes[i])
+        Xp = np.empty((samples_excluding_group, X.shape[1]))
+        Yp = np.empty((samples_excluding_group, Y.shape[1]))
+
+        Xp[0:start_indexes[i], :] = X[0:start_indexes[i], :]
+        Xp[start_indexes[i]:, :] = X[end_indexes[i]:, :]
+        Yp[0:start_indexes[i], :] = Y[0:start_indexes[i], :]
+        Yp[start_indexes[i]:, :] = Y[end_indexes[i]:, :]
+
         model = R(X=Xp, Y=Yp, **others)
-        Yhat[i, :] = model.prediction(Z=X[i, :])
+        Yhat[start_indexes[i]:end_indexes[i], :] = \
+            model.prediction(Z=X[start_indexes[i]:end_indexes[i], :])
 
     if relative:
         return (((Yhat - Y) / Y)**2).sum()
@@ -177,7 +197,7 @@ def PRESS(R, X, Y, others=None, relative=False):
         return ((Yhat - Y)**2).sum()
 
 
-def Q2(R, X, Y, others=None):
+def Q2(R, X, Y, groups=4, others=None):
     """Implements the Q**2 statistic
 
     This function calculates the Q**2 statistic for a given regression
@@ -192,6 +212,7 @@ def Q2(R, X, Y, others=None):
         R (class): A regression class
         X (ndarray N x n): X calibration data, one row per data sample
         Y (ndarray N x m): Y calibration data, one row per data sample
+        groups (int, optional): Number of cross-validation groups to use
         others (dict, optional): A dict of other parameters to send to the
             regression class constructor.
 
@@ -200,7 +221,7 @@ def Q2(R, X, Y, others=None):
 
     """
 
-    return (1.0 - PRESS(R, X, Y, others, relative=False) / SS(Y))
+    return (1.0 - PRESS(R, X, Y, groups, others, relative=False) / SS(Y))
 
 
 def residuals_QQ(Y):
