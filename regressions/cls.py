@@ -1,7 +1,5 @@
 """A module which implements Classical Least Squares Regression."""
 
-import random
-
 from . import *
 
 

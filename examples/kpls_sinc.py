@@ -9,9 +9,6 @@ Journal of Machine Learning Research 2 (2001) 97-123"""
 
 # Copyright (c) 2015, James Humphry - see LICENSE file for details
 
-import math
-import random
-
 import numpy as np
 import matplotlib.pyplot as plt
 

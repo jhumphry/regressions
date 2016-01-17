@@ -206,9 +206,9 @@ class PCR_NIPALS(RegressionBase):
                                      'number of variables as the original X '
                                      'data')
         elif Z.shape[1] != self.X_variables:
-                raise ParameterError('Data provided does not have the same '
-                                     'number of variables as the original X '
-                                     'data')
+            raise ParameterError('Data provided does not have the same '
+                                 'number of variables as the original X data')
+
         tmp = (Z - self.X_offset)
         if self.standardized_X:
             tmp *= self.X_rscaling

@@ -177,7 +177,7 @@ class Kernel_PLS(RegressionBase):
 
         Kt = (Kt - centralizer @ self.K) @ \
             (np.identity(self.data_samples) -
-                (1.0 / self.data_samples) * np.ones(self.data_samples))
+            (1.0 / self.data_samples) * np.ones(self.data_samples))
 
         # Fix centralisation - appears to be necessary but not usually
         # mentioned in papers

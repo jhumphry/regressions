@@ -10,9 +10,6 @@ Rosipal """
 
 # Copyright (c) 2015, James Humphry - see LICENSE file for details
 
-import math
-import random
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -20,6 +17,7 @@ from regressions import kernel_pls, kernels
 
 
 def z(x):
+    '''Example function'''
     return 4.26 * (np.exp(-x) - 4 * np.exp(-2.0*x) + 3 * np.exp(-3.0*x))
 
 # Define the kernel

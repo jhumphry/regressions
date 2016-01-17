@@ -1,7 +1,5 @@
 """A module which implements Multiple Linear Regression."""
 
-import random
-
 from . import *
 
 

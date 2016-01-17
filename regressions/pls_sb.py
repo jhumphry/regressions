@@ -1,7 +1,5 @@
 """A module which implements the PLS-SB algorithm."""
 
-import random
-
 from . import *
 
 
@@ -40,7 +38,7 @@ class PLS_SB(RegressionBase):
         self.components = g
 
         XtY = Xc.T @ Yc
-        ev, W = linalg.eigh(XtY @ XtY.T)
+        _, W = linalg.eigh(XtY @ XtY.T)
 
         self.W = W[:, :-g-1:-1].real
 

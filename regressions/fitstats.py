@@ -109,7 +109,7 @@ def R2(R, X, Y, others=None):
 
     """
 
-    return (1.0 - RESS(R, X, Y, others, relative=False) / SS(Y))
+    return 1.0 - RESS(R, X, Y, others, relative=False) / SS(Y)
 
 
 def PRESS(R, X, Y, groups=4, others=None, relative=False):
@@ -221,7 +221,7 @@ def Q2(R, X, Y, groups=4, others=None):
 
     """
 
-    return (1.0 - PRESS(R, X, Y, groups, others, relative=False) / SS(Y))
+    return 1.0 - PRESS(R, X, Y, groups, others, relative=False) / SS(Y)
 
 
 def residuals_QQ(Y):
