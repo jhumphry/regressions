@@ -73,7 +73,7 @@ plt.subplot(3, 1, 2)
 plt.title('MSE versus number of components for kernel PLS')
 plt.plot(range(1, 31), test_mse, 'b-o')
 plt.autoscale(enable=True, axis='x', tight=True)
-plt.gca().set_yscale('log', basey=10)
+plt.gca().set_yscale('log', base=10)
 
 plt.subplot(3, 1, 3)
 plt.title('Gaussian kernel PLS reconstruction')
