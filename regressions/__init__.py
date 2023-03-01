@@ -14,7 +14,7 @@ samples in each. Currently missing data or NaN are not supported.
 
 """
 
-# Copyright (c) 2015, James Humphry - see LICENSE file for details
+# Copyright (c) 2015-2023, James Humphry - see LICENSE file for details
 
 import abc
 
