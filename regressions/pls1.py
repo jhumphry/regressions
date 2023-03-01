@@ -184,7 +184,8 @@ class PLS1(RegressionBase):
                 raise ParameterError('Data provided does not have the  same '
                                      'number of variables as the original X '
                                      'data')
-            result = self.Y_offset.copy()
+            result = np.empty((Z.shape[0], self.Y_variables))
+            result[:, :] = self.Y_offset
             for k in range(0, self.Y_variables):
                 x_j = Z - self.X_offset
                 t = np.empty((self.components))
@@ -201,7 +202,7 @@ class PLS1(RegressionBase):
                                      'number of variables as the original X '
                                      'data')
             result = np.empty((Z.shape[0], self.Y_variables))
-            result[:, :] = self.Y_offset.copy()
+            result[:, :] = self.Y_offset
             for l in range(0, Z.shape[0]):
                 for k in range(0, self.Y_variables):
                     x_j = Z[l, :] - self.X_offset
