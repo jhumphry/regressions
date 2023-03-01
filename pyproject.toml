@@ -1,0 +1,32 @@
+# Project file for the Regressions package
+
+[project]
+name = "Regressions"
+version = "0.1.0"
+description = """Implementations of various regression algorithms, including \
+                 Partial Least Squares and Principal Components Regression"""
+readme = "README.md"
+requires-python = ">=3.6"
+license = {text="ISC License"}
+authors = [{name = "J Humphry", email = "git@binecho.co.uk"}]
+keywords = ["statistics", "PLS", "regression"]
+
+dependencies = ["numpy>=1.10"]
+
+[project.optional-dependencies]
+scipy=  ["scipy"]
+
+[project.urls]
+repository = "https://github.com/jhumphry/regressions"
+
+[tool.pyright]
+include = ["regressions", "examples"]
+exclude = ["**/node_modules",
+    "**/__pycache__"
+]
+
+reportMissingImports = true
+reportMissingTypeStubs = false
+
+pythonVersion = "3.6"
+
