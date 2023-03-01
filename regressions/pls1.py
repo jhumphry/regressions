@@ -45,6 +45,9 @@ class PLS1(RegressionBase):
     def __init__(self, X, Y, g,
                  epsilon=DEFAULT_EPSILON, ignore_failures=False):
 
+        if epsilon <= 0.0:
+            raise ParameterError("Epsilon must be positive")
+
         Xc, Yc = super()._prepare_data(X, Y)
 
         if g < 1 or g > self.max_rank:

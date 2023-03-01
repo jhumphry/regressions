@@ -66,6 +66,12 @@ class PCR_NIPALS(RegressionBase):
                  iteration_convergence=DEFAULT_EPSILON,
                  ignore_failures=True):
 
+        if max_iterations < 1:
+            raise ParameterError("At least one iteration is necessary")
+
+        if iteration_convergence <= 0.0:
+            raise ParameterError("Iteration convergence limit must be positive")
+
         if (g is None) == (variation_explained is None):
             raise ParameterError('Must specify either the number of principal '
                                  'components g to use or the proportion of '

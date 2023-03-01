@@ -53,6 +53,12 @@ class PLS2(RegressionBase):
                  iteration_convergence=DEFAULT_EPSILON,
                  ignore_failures=True):
 
+        if max_iterations < 1:
+            raise ParameterError("At least one iteration is necessary")
+
+        if iteration_convergence <= 0.0:
+            raise ParameterError("Iteration convergence limit must be positive")
+
         Xc, Yc = super()._prepare_data(X, Y)
 
         if g < 1 or g > self.max_rank:

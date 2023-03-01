@@ -54,6 +54,12 @@ class Kernel_PLS(RegressionBase):
                  iteration_convergence=DEFAULT_EPSILON,
                  ignore_failures=True):
 
+        if max_iterations < 1:
+            raise ParameterError("At least one iteration is necessary")
+
+        if iteration_convergence <= 0.0:
+            raise ParameterError("Iteration convergence limit must be positive")
+
         Xc, Yc = super()._prepare_data(X, Y)
 
         self.X_training_set = Xc
