@@ -35,7 +35,6 @@ class ParameterError(Exception):
     This is a generic exception used to indicate that the parameters
     passed are mis-matched, nonsensical or otherwise problematic.
     """
-    pass
 
 
 class ConvergenceError(Exception):
@@ -47,7 +46,6 @@ class ConvergenceError(Exception):
     have been extracted by an iterative process and the residue is
     becoming dominated by rounding or other errors.
     """
-    pass
 
 DEFAULT_MAX_ITERATIONS = 250
 """Default maximum number of iterations that iterative routines will

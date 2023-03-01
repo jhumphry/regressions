@@ -14,6 +14,9 @@ import matplotlib.pyplot as plt
 
 from regressions import kernel_pls, kernels
 
+# pyright: reportInvalidStringEscapeSequence=false
+# This is because pyright doesn't like the escape sequences used by matplotlib
+
 # Perform Kernel PLS on an uncontaminated sinc function to view the principal
 # components
 
