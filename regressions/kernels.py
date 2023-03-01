@@ -7,9 +7,14 @@ K(x, y) where x and y are either floats or numpy.ndarray of float.
 import math
 
 from . import *
+from typing import Union
+from collections.abc import Callable
 
+Kernel_Function = Callable[[Union[float, np.ndarray],
+                            Union[float, np.ndarray]], float]
 
-def std_gaussian(x, y):
+def std_gaussian(x : Union[float, np.ndarray],
+                 y : Union[float, np.ndarray]) -> float:
     """A Gaussian kernel with width 1.
 
     The Gaussian kernel with standard deviation 1 is a routine choice.
@@ -22,7 +27,7 @@ def std_gaussian(x, y):
     return 0.3989422804014327 * math.exp(- 0.5 * np.sum((x-y)**2))
 
 
-def make_gaussian_kernel(width=1.0):
+def make_gaussian_kernel(width : float=1.0) -> Kernel_Function:
     """Create a Gaussian kernel with adjustable width
 
     Args:

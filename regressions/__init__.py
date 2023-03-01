@@ -18,6 +18,8 @@ samples in each. Currently missing data or NaN are not supported.
 
 import abc
 
+from typing import Tuple, Union
+
 import numpy as np
 try:
     import scipy.linalg as linalg
@@ -83,11 +85,28 @@ class RegressionBase(metaclass=abc.ABCMeta):
         Y_scaling (float): the scaling factor used for Y
     """
 
+    # Type declarations for attributes:
+    data_samples : int
+    max_rank : int
+    X_variables : int
+    Y_variables : int
+    X_offset : float
+    Y_offset : float
+    standardized_X : bool
+    standardized_Y : bool
+    X_rscaling : Union[float, None]
+    Y_scaling : Union[float, None]
+
     @abc.abstractmethod
-    def __init__(self, X, Y, standardize_X=False, standardize_Y=False):
+    def __init__(self, X : np.ndarray, Y : np.ndarray,
+                        standardize_X : bool = False,
+                        standardize_Y : bool = False):
         pass
 
-    def _prepare_data(self, X, Y, standardize_X=False, standardize_Y=False):
+    def _prepare_data(self, X : np.ndarray, Y : np.ndarray,
+                        standardize_X : bool = False,
+                        standardize_Y : bool = False) \
+                            -> Tuple[np.ndarray, np.ndarray]:
 
         """A private method that conducts routine data preparation
 

@@ -1,9 +1,15 @@
 """A module which implements kernel PLS."""
 
 import random
+from collections.abc import Callable
 
 from . import *
+from .kernels import Kernel_Function
 
+
+# pyright: reportUnboundVariable=false
+# There will always be at least one iteration so w_j, t_j and q_j are always
+# bound before they are used - however pyright cannot do this sort of analysis
 
 class Kernel_PLS(RegressionBase):
 
@@ -49,10 +55,21 @@ class Kernel_PLS(RegressionBase):
 
     """
 
-    def __init__(self, X, Y, g, X_kernel,
-                 max_iterations=DEFAULT_MAX_ITERATIONS,
-                 iteration_convergence=DEFAULT_EPSILON,
-                 ignore_failures=True):
+    # Type declarations for attributes:
+    components : int
+    X_training_set : np.ndarray
+    K : np.ndarray
+    P : np.ndarray
+    Q : np.ndarray
+    T : np.ndarray
+    U : np.ndarray
+    B_RHS : np.ndarray
+
+    def __init__(self, X : np.ndarray, Y : np.ndarray, g : int,
+                 X_kernel : Kernel_Function,
+                 max_iterations : int=DEFAULT_MAX_ITERATIONS,
+                 iteration_convergence : float=DEFAULT_EPSILON,
+                 ignore_failures : bool=True) -> None:
 
         if max_iterations < 1:
             raise ParameterError("At least one iteration is necessary")
@@ -62,7 +79,7 @@ class Kernel_PLS(RegressionBase):
 
         Xc, Yc = super()._prepare_data(X, Y)
 
-        self.X_training_set = Xc
+        self.X_training_set : np.ndarray = Xc
         self.X_kernel = X_kernel
 
         K = np.empty((self.data_samples, self.data_samples))
@@ -93,6 +110,10 @@ class Kernel_PLS(RegressionBase):
             iteration_count = 0
             iteration_change = iteration_convergence * 10.0
 
+            w_j : np.ndarray
+            t_j : np.ndarray
+            q_j : np.ndarray
+
             while iteration_count < max_iterations and \
                     iteration_change > iteration_convergence:
 
@@ -119,7 +140,7 @@ class Kernel_PLS(RegressionBase):
             Q[:, j] = q_j
             U[:, j] = u_j
 
-            P[:, j] = (K_j.T @ w_j) / (w_j @ w_j)
+            P[:, j] = (K_j.T @ w_j) / (w_j @ w_j) # type: ignore
             deflator = (np.identity(self.data_samples) - np.outer(t_j.T, t_j))
             K_j = deflator @ K_j @ deflator
             Y_j = Y_j - np.outer(t_j, q_j.T)
@@ -135,7 +156,7 @@ class Kernel_PLS(RegressionBase):
 
         self.B_RHS = self.U @ linalg.inv(self.T.T @ self.K @ self.U) @ self.Q.T
 
-    def prediction(self, Z):
+    def prediction(self, Z : np.ndarray) -> np.ndarray:
         """Predict the output resulting from a given input
 
         Args:

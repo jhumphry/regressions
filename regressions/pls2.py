@@ -5,6 +5,10 @@ import random
 from . import *
 
 
+# pyright: reportUnboundVariable=false
+# There will always be at least one iteration so w_j, t_j and q_j are always
+# bound before they are used - however pyright cannot do this sort of analysis
+
 class PLS2(RegressionBase):
 
     """Regression using the PLS2 algorithm.
@@ -48,10 +52,20 @@ class PLS2(RegressionBase):
 
     """
 
-    def __init__(self, X, Y, g,
-                 max_iterations=DEFAULT_MAX_ITERATIONS,
-                 iteration_convergence=DEFAULT_EPSILON,
-                 ignore_failures=True):
+    # Type declarations for attributes:
+    components : int
+    P : np.ndarray
+    Q : np.ndarray
+    T : np.ndarray
+    U : np.ndarray
+    W : np.ndarray
+    C : np.ndarray
+    B : np.ndarray
+
+    def __init__(self, X : np.ndarray, Y : np.ndarray, g : int,
+                 max_iterations : int=DEFAULT_MAX_ITERATIONS,
+                 iteration_convergence : float=DEFAULT_EPSILON,
+                 ignore_failures : bool=True) -> None:
 
         if max_iterations < 1:
             raise ParameterError("At least one iteration is necessary")
@@ -130,7 +144,7 @@ class PLS2(RegressionBase):
 
         self.B = self.W @ linalg.inv(self.P.T @ self.W) @ self.C @ self.Q.T
 
-    def prediction(self, Z):
+    def prediction(self, Z : np.ndarray) -> np.ndarray:
 
         """Predict the output resulting from a given input
 
@@ -166,7 +180,7 @@ class PLS2(RegressionBase):
                               (Z[i, :] - self.X_offset).T @ self.B
             return result
 
-    def prediction_iterative(self, Z):
+    def prediction_iterative(self, Z : np.ndarray) -> np.ndarray:
 
         """Predict the output resulting from a given input, iteratively
 

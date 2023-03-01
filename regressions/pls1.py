@@ -42,8 +42,17 @@ class PLS1(RegressionBase):
 
     """
 
-    def __init__(self, X, Y, g,
-                 epsilon=DEFAULT_EPSILON, ignore_failures=False):
+    # Type declarations for attributes:
+    components : int
+    W : np.ndarray
+    P : np.ndarray
+    T : np.ndarray
+    c : np.ndarray
+    b : np.ndarray
+
+    def __init__(self, X : np.ndarray, Y : np.ndarray, g : int,
+                 epsilon : float=DEFAULT_EPSILON,
+                 ignore_failures : bool=False) -> None:
 
         if epsilon <= 0.0:
             raise ParameterError("Epsilon must be positive")
@@ -111,7 +120,7 @@ class PLS1(RegressionBase):
         self.c = c[:, 0:self.components]
         self.b = b
 
-    def prediction(self, Z):
+    def prediction(self, Z : np.ndarray) -> np.ndarray:
 
         """Predict the output resulting from a given input
 
@@ -147,7 +156,7 @@ class PLS1(RegressionBase):
                               (Z[i, :] - self.X_offset).T @ self.b.T
             return result
 
-    def prediction_iterative(self, Z):
+    def prediction_iterative(self, Z : np.ndarray) -> np.ndarray:
 
         """Predict the output resulting from a given input, iteratively
 

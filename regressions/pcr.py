@@ -3,7 +3,11 @@
 import random
 
 from . import *
+from typing import Union
 
+# pyright: reportUnboundVariable=false
+# There will always be at least one iteration so p_j is always
+# bound before it is used - however pyright cannot do this sort of analysis
 
 class PCR_NIPALS(RegressionBase):
 
@@ -60,11 +64,22 @@ class PCR_NIPALS(RegressionBase):
 
     """
 
-    def __init__(self, X, Y, g=None, variation_explained=None,
-                 standardize_X=False, standardize_Y=False,
-                 max_iterations=DEFAULT_MAX_ITERATIONS,
-                 iteration_convergence=DEFAULT_EPSILON,
-                 ignore_failures=True):
+    # Type declarations for attributes:
+    components : int
+    T : np.ndarray
+    P : np.ndarray
+    eigenvalues : np.ndarray
+    total_variation : float
+    C : np.ndarray
+    PgC : np.ndarray
+
+    def __init__(self, X : np.ndarray, Y : np.ndarray,
+                 g : Union[int, None]=None,
+                 variation_explained : Union[float, None]=None,
+                 standardize_X : bool=False, standardize_Y : bool=False,
+                 max_iterations : int=DEFAULT_MAX_ITERATIONS,
+                 iteration_convergence : float=DEFAULT_EPSILON,
+                 ignore_failures : bool=True) -> None:
 
         if max_iterations < 1:
             raise ParameterError("At least one iteration is necessary")
@@ -113,10 +128,12 @@ class PCR_NIPALS(RegressionBase):
         self.C = np.diag(1.0 / self.eigenvalues) @ self.T.T @ Yc
         self.PgC = self.P @ self.C
 
-    def _perform_pca(self, X, g=None, variation_explained=None,
-                     max_iterations=DEFAULT_MAX_ITERATIONS,
-                     iteration_convergence=DEFAULT_EPSILON,
-                     ignore_failures=True):
+    def _perform_pca(self, X : np.ndarray,
+                     g : Union[int, None]=None,
+                     variation_explained : Union[float, None]=None,
+                     max_iterations : int=DEFAULT_MAX_ITERATIONS,
+                     iteration_convergence : float=DEFAULT_EPSILON,
+                     ignore_failures : bool=True) -> None:
 
         """A non-public routine that performs the PCA using an appropriate
         method and sets up self.T, self.P, self.eignvalues and
@@ -175,7 +192,7 @@ class PCR_NIPALS(RegressionBase):
 
         self.eigenvalues = eig[0:self.components]
 
-    def variation_explained(self):
+    def variation_explained(self) -> float:
 
         """Return the proportion of variation explained
 
@@ -187,7 +204,7 @@ class PCR_NIPALS(RegressionBase):
 
         return self.eigenvalues.sum() / self.total_variation
 
-    def prediction(self, Z):
+    def prediction(self, Z : np.ndarray) -> np.ndarray:
 
         """Predict the output resulting from a given input
 
@@ -217,10 +234,10 @@ class PCR_NIPALS(RegressionBase):
 
         tmp = (Z - self.X_offset)
         if self.standardized_X:
-            tmp *= self.X_rscaling
+            tmp *= self.X_rscaling # type: ignore
         tmp = tmp @ self.PgC
         if self.standardized_Y:
-            tmp *= self.Y_scaling
+            tmp *= self.Y_scaling # type: ignore
         return self.Y_offset + tmp
 
 
@@ -256,10 +273,12 @@ class PCR_SVD(PCR_NIPALS):
 
     """
 
-    def _perform_pca(self, X, g=None, variation_explained=None,
-                     max_iterations=DEFAULT_MAX_ITERATIONS,
-                     iteration_convergence=DEFAULT_EPSILON,
-                     ignore_failures=True):
+    def _perform_pca(self, X : np.ndarray,
+                     g : Union[int, None]=None,
+                     variation_explained : Union[float, None]=None,
+                     max_iterations : int=DEFAULT_MAX_ITERATIONS,
+                     iteration_convergence : float=DEFAULT_EPSILON,
+                     ignore_failures : bool=True) -> None:
 
         """A non-public routine that performs the PCA using an appropriate
         method and sets up self.total_variation, self.T, self.P,
